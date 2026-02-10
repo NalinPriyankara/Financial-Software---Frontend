@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect } from "react";
 import { styled, useTheme, Theme, CSSObject } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
@@ -24,7 +25,7 @@ import {
   Stack,
   useMediaQuery,
 } from "@mui/material";
-import { Link, useLocation, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate, Outlet } from "react-router";
 import { SidebarItem, getSidebarItems } from "./SidebarItems";
 import theme from "../../theme";
 import useIsMobile from "../../customHooks/useIsMobile";
@@ -128,7 +129,7 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 interface Props {
-  children: JSX.Element | JSX.Element[];
+  children?: JSX.Element | JSX.Element[] | null;
 }
 
 export default function MainLayout({ children }: Props) {
@@ -313,7 +314,7 @@ export default function MainLayout({ children }: Props) {
       )}
       <Box component="main" sx={{ flexGrow: 1, }}>
         <DrawerHeader />
-        {children}
+        {children ? children : <Outlet />}
       </Box>
     </Box>
   );

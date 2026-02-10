@@ -9,7 +9,6 @@ import { User, validateUser } from "./api/userApi";
 
 
 import Dashboard from "./views/Dashboard/Dashboard";
-import CompanySetup from "./views/Setup/CompanySetup";
 import AddUserForm from "./views/Setup/User/AddUserForm";
 import UserManagementTable from "./views/Setup/User/UserManagementTable";
 import UserAccessForm from "./views/Setup/UserAccess/AddUserAccessForm";
@@ -19,6 +18,8 @@ import UpdateUserForm from "./views/Setup/User/UpdateUserForm";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { PERMISSION_ID_MAP } from "./permissions/map";
+import CompanySetupForm from "./views/Setup/CompanySetup/CompanySetupForm";
+import UpdateCompanySetupForm from "./views/Setup/CompanySetup/UpdateCompanySetupForm";
 
 const LoginPage = React.lazy(() => import("./views/LoginPage/LoginPage"));
 
@@ -26,31 +27,9 @@ const UnderDevelopment = React.lazy(
   () => import("./components/UnderDevelopment")
 );
 
-function withLayout(Layout: any, Component: any, restrictAccess = false) {
+function withSuspense(Component: any) {
   return (
-    <Layout>
-      <Suspense
-        fallback={
-          <>
-            <PageLoader />
-          </>
-        }
-      >
-        {restrictAccess ? <PermissionDenied /> : <Component />}
-      </Suspense>
-    </Layout>
-  );
-}
-
-function withoutLayout(Component: React.LazyExoticComponent<any>) {
-  return (
-    <Suspense
-      fallback={
-        <>
-          <PageLoader />
-        </>
-      }
-    >
+    <Suspense fallback={<PageLoader />}>
       <Component />
     </Suspense>
   );
@@ -74,67 +53,41 @@ const AppRoutes = () => {
   }, [user]);
   return (
     <Routes>
-      <Route path="/" element={withoutLayout(LoginPage)} />
-      <Route path="/not-authorized" element={withLayout(MainLayout, PermissionDenied)} />
-      <Route element={<ProtectedRoute />}>
-        <Route
-          path="/dashboard"
-          element={withLayout(MainLayout, Dashboard)}
-        />
-      </Route>
+      <Route path="/" element={withSuspense(LoginPage)} />
+      <Route path="/not-authorized" element={<MainLayout>{withSuspense(PermissionDenied)}</MainLayout>} />
 
-      <Route path="/setup" element={<ProtectedRoute required={PERMISSION_ID_MAP['Company Setup']} />}>
-        <Route
-          path="companysetup"
-          element={withLayout(MainLayout, CompanySetup)}
-        />
-        {/* users setup page - require Users setup permission */}
-        <Route
-          path="companysetup/user-account-setup"
-          element={
-            <ProtectedRoute required={PERMISSION_ID_MAP['Users setup']}>
-              {withLayout(MainLayout, UserManagementTable)}
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="companysetup/add-user"
-          element={
-            <ProtectedRoute required={PERMISSION_ID_MAP['Users setup']}>
-              {withLayout(MainLayout, AddUserForm)}
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="companysetup/update-user/:id"
-          element={
-            <ProtectedRoute required={PERMISSION_ID_MAP['Users setup']}>
-              {withLayout(MainLayout, UpdateUserForm)}
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="companysetup/access-setup"
-          element={
-            <ProtectedRoute required={PERMISSION_ID_MAP['Access levels edition']}>
-              {withLayout(MainLayout, AddUserAccessForm)}
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="companysetup/edit-access-setup"
-          element={
-            <ProtectedRoute required={PERMISSION_ID_MAP['Access levels edition']}>
-              {withLayout(MainLayout, UpdateUserAccessForm)}
-            </ProtectedRoute>
-          }
-        />
+      {/* Protected area: MainLayout mounts once here and children render inside it */}
+      <Route element={<ProtectedRoute />}> 
+        <Route element={<MainLayout />}> 
+          <Route path="/dashboard" element={withSuspense(Dashboard)} />
+
+          <Route path="/setup/companysetup/company-setup" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['Company parameters']}>{withSuspense(CompanySetupForm)}</ProtectedRoute>
+          } />
+
+          <Route path="/setup/companysetup/update-company-setup/:id" element={withSuspense(UpdateCompanySetupForm)} />
+
+          <Route path="/setup/companysetup/user-account-setup" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['Users setup']}>{withSuspense(UserManagementTable)}</ProtectedRoute>
+          } />
+
+          <Route path="/setup/companysetup/add-user" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['Users setup']}>{withSuspense(AddUserForm)}</ProtectedRoute>
+          } />
+
+          <Route path="/setup/companysetup/update-user/:id" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['Users setup']}>{withSuspense(UpdateUserForm)}</ProtectedRoute>
+          } />
+
+          <Route path="/setup/companysetup/access-setup" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['Access levels edition']}>{withSuspense(AddUserAccessForm)}</ProtectedRoute>
+          } />
+
+          <Route path="/setup/companysetup/edit-access-setup" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['Access levels edition']}>{withSuspense(UpdateUserAccessForm)}</ProtectedRoute>
+          } />
         </Route>
-      
-        <Route
-          path="/dashboard"
-          element={withLayout(MainLayout, Dashboard)}
-        />
+      </Route>
     </Routes>
   );
 };

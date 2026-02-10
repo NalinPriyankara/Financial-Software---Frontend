@@ -143,7 +143,7 @@ export default function UserManagementTable() {
           <Button
             variant="outlined"
             startIcon={<ArrowBackIcon />}
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/dashboard")}
           >
             Back
           </Button>

@@ -26,6 +26,8 @@ import {
   updateSecurityRole,
   deleteSecurityRole,
 } from "../../../api/AccessSetup/AccessSetupApi";
+import AddedConfirmationModal from "../../../components/AddedConfirmationModal";
+import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
 import { useEffect } from "react";
 
 const permissionList = [
@@ -464,6 +466,10 @@ export default function AddUserAccessForm() {
   const [availableRoles, setAvailableRoles] = useState<Array<any>>([]);
   const [loading, setLoading] = useState(false);
   const [isNewMode, setIsNewMode] = useState(true);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [addedModalOpen, setAddedModalOpen] = useState(false);
+  const [addedModalTitle, setAddedModalTitle] = useState("");
+  const [addedModalContent, setAddedModalContent] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -613,7 +619,9 @@ export default function AddUserAccessForm() {
         try {
           const res = await createSecurityRole(payload);
           console.log("Created role:", res);
-          alert("Role created successfully");
+          setAddedModalTitle("Role created");
+          setAddedModalContent(<Typography>Role created successfully</Typography>);
+          setAddedModalOpen(true);
           // reset form
           setFormData({
             selectedRole: "",
@@ -650,7 +658,9 @@ export default function AddUserAccessForm() {
         try {
           const res = await updateSecurityRole(id, payload);
           console.log("Updated role:", res);
-          alert("Role updated successfully");
+          setAddedModalTitle("Role updated");
+          setAddedModalContent(<Typography>Role updated successfully</Typography>);
+          setAddedModalOpen(true);
               // reset form to new-role default
               setFormData({
                 selectedRole: "__new",
@@ -686,12 +696,9 @@ export default function AddUserAccessForm() {
 
   const handleDelete = async () => {
     if (!formData.selectedRole) return;
-    if (!confirm("Are you sure you want to delete this role?")) return;
     setLoading(true);
     try {
       await deleteSecurityRole(formData.selectedRole);
-      alert("Role deleted");
-      // reset form and refresh
       setFormData({
         selectedRole: "__new",
         roleName: "",
@@ -707,6 +714,7 @@ export default function AddUserAccessForm() {
       alert("Failed to delete role. See console for details.");
     } finally {
       setLoading(false);
+      setDeleteModalOpen(false);
     }
   };
 
@@ -1242,7 +1250,7 @@ export default function AddUserAccessForm() {
             gap: isMobile ? 2 : 0,
           }}
         >
-          <Button fullWidth={isMobile} onClick={() => navigate("/")} disabled={loading}>
+          <Button fullWidth={isMobile} onClick={() => navigate("/dashboard")} disabled={loading}>
             Back
           </Button>
 
@@ -1252,7 +1260,7 @@ export default function AddUserAccessForm() {
                 color="error"
                 variant="outlined"
                 disabled={loading}
-                onClick={handleDelete}
+                onClick={() => setDeleteModalOpen(true)}
               >
                 Delete
               </Button>
@@ -1269,6 +1277,22 @@ export default function AddUserAccessForm() {
             </Button>
           </Box>
         </Box>
+        <DeleteConfirmationModal
+          open={deleteModalOpen}
+          title="Delete Role"
+          content={<Typography>Are you sure you want to delete this role?</Typography>}
+          handleClose={() => setDeleteModalOpen(false)}
+          handleReject={() => setDeleteModalOpen(false)}
+          deleteFunc={async () => handleDelete()}
+          onSuccess={() => {}}
+        />
+        <AddedConfirmationModal
+          open={addedModalOpen}
+          title={addedModalTitle}
+          content={addedModalContent}
+          handleClose={() => setAddedModalOpen(false)}
+          addFunc={async () => setAddedModalOpen(false)}
+        />
       </Paper>
     </Stack>
   );

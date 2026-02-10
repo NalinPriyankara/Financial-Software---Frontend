@@ -84,9 +84,12 @@ const ProfileImage: React.FC<ProfileImageProps> = ({
     const cands = [trimmed];
     if (base) {
       // ensure no duplicate slashes
-      const t1 = `${base.replace(/\/$/, "")}/storage/${trimmed.replace(/^\//, "")}`;
-      const t2 = `${base.replace(/\/$/, "")}/${trimmed.replace(/^\//, "")}`;
-      cands.push(t1, t2);
+      const prefix = base.replace(/\/$/, "");
+      const tProfile = `${prefix}/profile_images/${trimmed.replace(/^\//, "")}`;
+      const t1 = `${prefix}/storage/${trimmed.replace(/^\//, "")}`;
+      const t2 = `${prefix}/${trimmed.replace(/^\//, "")}`;
+      // Try profile_images first, then storage, then root
+      cands.push(tProfile, t1, t2);
     }
 
     // unique

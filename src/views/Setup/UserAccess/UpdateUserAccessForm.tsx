@@ -17,6 +17,8 @@ import {
 } from "@mui/material";
 import theme from "../../../theme";
 import { useNavigate } from "react-router";
+import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
+import { deleteSecurityRole } from "../../../api/AccessSetup/AccessSetupApi";
 
 const permissionList = [
   "System Administration",
@@ -70,6 +72,7 @@ export default function UpdateUserAccessForm() {
 
   const [errors, setErrors] = useState<Partial<UserAccessFormData>>({});
   const navigate = useNavigate();
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any
@@ -126,6 +129,20 @@ export default function UpdateUserAccessForm() {
     if (validate()) {
       console.log("Submitted Data:", formData);
       alert("Form submitted successfully!");
+    }
+  };
+
+  const handleDeleteConfirmed = async () => {
+    if (!formData.selectedRole) return;
+    try {
+      await deleteSecurityRole(formData.selectedRole);
+      alert("Role deleted");
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete role");
+    } finally {
+      setDeleteModalOpen(false);
     }
   };
 
@@ -254,17 +271,39 @@ export default function UpdateUserAccessForm() {
           </Box>
         </Stack>
 
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-          <Button onClick={() => navigate("/")}>Back</Button>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3, gap: 2 }}>
+          <Button onClick={() => navigate("/dashboard")}>Back</Button>
 
-          <Button
-            variant="contained"
-            sx={{ backgroundColor: "var(--pallet-blue)" }}
-            onClick={handleSubmit}
-          >
-            Insert New Role
-          </Button>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button
+              variant="outlined"
+              color="error"
+              disabled={!formData.selectedRole}
+              onClick={() => setDeleteModalOpen(true)}
+            >
+              Delete
+            </Button>
+
+            <Button
+              variant="contained"
+              sx={{ backgroundColor: "var(--pallet-blue)" }}
+              onClick={handleSubmit}
+            >
+              Insert New Role
+            </Button>
+          </Box>
         </Box>
+        <DeleteConfirmationModal
+          open={deleteModalOpen}
+          title="Delete Role"
+          content={<Typography>Are you sure you want to delete this role?</Typography>}
+          handleClose={() => setDeleteModalOpen(false)}
+          handleReject={() => setDeleteModalOpen(false)}
+          deleteFunc={async () => handleDeleteConfirmed()}
+          onSuccess={() => {
+            /* navigation handled in handleDeleteConfirmed */
+          }}
+        />
       </Paper>
     </Stack>
   );
