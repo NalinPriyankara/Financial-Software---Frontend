@@ -23,7 +23,7 @@ import useIsMobile from "../../customHooks/useIsMobile";
 import { User } from "../../api/userApi"; // Keep User type if needed for typing
 import { updateUser } from "../../api/UserManagement/userManagement";
 import queryClient from "../../state/queryClient";
-import { genderOptions } from "../../constants/accidentConstants";
+// genderOptions import removed — not used in this dialog
 
 type DialogProps = {
   open: boolean;
