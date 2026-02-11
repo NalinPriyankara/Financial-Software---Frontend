@@ -1,7 +1,8 @@
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import HomeIcon from "@mui/icons-material/Home";
 import LayersIcon from "@mui/icons-material/Layers";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import ChatIcon from "@mui/icons-material/Chat";
+import UploadIcon from "@mui/icons-material/Upload";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 import SpaIcon from "@mui/icons-material/Spa";
@@ -53,44 +54,35 @@ const baseSidebarItems: Array<SidebarItem> = [
     href: "/dashboard",
     icon: <DashboardIcon fontSize="small" />,
   },
-  // {
-  //   title: "Sales",
-  //   href: "/sales",
-  //   icon: <DashboardIcon fontSize="small" />,
-  //   nestedItems: [
-  //     {
-  //       title: "Transactions",
-  //       href: "/sales/transactions",
-  //     },
-  //     {
-  //       title: "Inquiries and Reports",
-  //       href: "/sales/inquiriesandreports",
-  //     },
-  //     {
-  //       title: "Maintenance",
-  //       href: "/sales/maintenance",
-  //     },
-  //   ],
-  // },
-  // {
-  //   title: "Purchase",
-  //   href: "/purchase",
-  //   icon: <ForestIcon fontSize="small" />,
-  //   nestedItems: [
-  //     {
-  //       title: "Transactions",
-  //       href: "/purchase/transactions",
-  //     },
-  //     {
-  //       title: "Inquiries and Reports",
-  //       href: "/purchase/inquiriesandreports",
-  //     },
-  //     {
-  //       title: "Maintenance",
-  //       href: "/purchase/maintenance",
-  //     },
-  //   ],
-  // },
+  {
+    title: "Chat",
+    href: "/chat",
+    icon: <ChatIcon fontSize="small" />,
+  },
+  {
+    title: "Data Upload",
+    href: "/upload-files",
+    icon: <UploadIcon fontSize="small" />,
+  },
+  {
+    title: "Management Incent",
+    href: "/purchase",
+    icon: <ForestIcon fontSize="small" />,
+    nestedItems: [
+      {
+        title: "Past Year Analysis",
+        href: "/management/past-year-analysis",
+      },
+      {
+        title: "Next Year Forecast ",
+        href: "/management/next-year-forecast",
+      },
+      {
+        title: "Achievement targets",
+        href: "/management/achievement-target",
+      },
+    ],
+  },
   // {
   //   title: "Item and inventory",
   //   href: "/itemsandinventory",

@@ -9,6 +9,8 @@ import { User, validateUser } from "./api/userApi";
 
 
 import Dashboard from "./views/Dashboard/Dashboard";
+import AIChat from "./views/Chat/AIChat";
+import UploadFilesPage from "./views/UploadFiles/UploadFilesPage";
 import AddUserForm from "./views/Setup/User/AddUserForm";
 import UserManagementTable from "./views/Setup/User/UserManagementTable";
 import UserAccessForm from "./views/Setup/UserAccess/AddUserAccessForm";
@@ -20,6 +22,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { PERMISSION_ID_MAP } from "./permissions/map";
 import CompanySetupForm from "./views/Setup/CompanySetup/CompanySetupForm";
 import UpdateCompanySetupForm from "./views/Setup/CompanySetup/UpdateCompanySetupForm";
+import AchievementTargetForm from "./views/Management/AchievementTarget/AchievementTargetForm";
+import NextYearForecast from "./views/Management/NextYearForecast/NextYearForecast";
+import PastYearAnalysis from "./views/Management/PastYearAnalysis/PastYearAnalysis";
 
 const LoginPage = React.lazy(() => import("./views/LoginPage/LoginPage"));
 
@@ -60,6 +65,12 @@ const AppRoutes = () => {
       <Route element={<ProtectedRoute />}> 
         <Route element={<MainLayout />}> 
           <Route path="/dashboard" element={withSuspense(Dashboard)} />
+          <Route path="/chat" element={withSuspense(AIChat)} />
+          <Route path="/upload-files" element={withSuspense(UploadFilesPage)} />
+
+          <Route path="/management/achievement-target" element={withSuspense(AchievementTargetForm)} />
+          <Route path="/management/next-year-forecast" element={withSuspense(NextYearForecast)} />
+          <Route path="/management/past-year-analysis" element={withSuspense(PastYearAnalysis)} />
 
           <Route path="/setup/companysetup/company-setup" element={
             <ProtectedRoute required={PERMISSION_ID_MAP['Company parameters']}>{withSuspense(CompanySetupForm)}</ProtectedRoute>
