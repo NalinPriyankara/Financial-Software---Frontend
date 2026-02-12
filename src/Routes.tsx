@@ -65,37 +65,45 @@ const AppRoutes = () => {
       <Route element={<ProtectedRoute />}> 
         <Route element={<MainLayout />}> 
           <Route path="/dashboard" element={withSuspense(Dashboard)} />
-          <Route path="/chat" element={withSuspense(AIChat)} />
-          <Route path="/upload-files" element={withSuspense(UploadFilesPage)} />
+          {/* <Route path="/chat" element={withSuspense(AIChat)} /> */}
+          <Route path="/upload-files" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['Data Upload']}>{withSuspense(UploadFilesPage)}</ProtectedRoute>
+          } />
 
-          <Route path="/management/achievement-target" element={withSuspense(AchievementTargetForm)} />
-          <Route path="/management/next-year-forecast" element={withSuspense(NextYearForecast)} />
-          <Route path="/management/past-year-analysis" element={withSuspense(PastYearAnalysis)} />
+          <Route path="/management/achievement-target" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['Achievement Targets']}>{withSuspense(AchievementTargetForm)}</ProtectedRoute>
+          } />
+          <Route path="/management/next-year-forecast" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['Next Year Analysis']}>{withSuspense(NextYearForecast)}</ProtectedRoute>
+          } />
+          <Route path="/management/past-year-analysis" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['Past Year Analysis']}>{withSuspense(PastYearAnalysis)}</ProtectedRoute>
+          } />
 
           <Route path="/setup/companysetup/company-setup" element={
-            <ProtectedRoute required={PERMISSION_ID_MAP['Company parameters']}>{withSuspense(CompanySetupForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Company Setup']}>{withSuspense(CompanySetupForm)}</ProtectedRoute>
           } />
 
           <Route path="/setup/companysetup/update-company-setup/:id" element={withSuspense(UpdateCompanySetupForm)} />
 
           <Route path="/setup/companysetup/user-account-setup" element={
-            <ProtectedRoute required={PERMISSION_ID_MAP['Users setup']}>{withSuspense(UserManagementTable)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['User Management']}>{withSuspense(UserManagementTable)}</ProtectedRoute>
           } />
 
           <Route path="/setup/companysetup/add-user" element={
-            <ProtectedRoute required={PERMISSION_ID_MAP['Users setup']}>{withSuspense(AddUserForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['User Management']}>{withSuspense(AddUserForm)}</ProtectedRoute>
           } />
 
           <Route path="/setup/companysetup/update-user/:id" element={
-            <ProtectedRoute required={PERMISSION_ID_MAP['Users setup']}>{withSuspense(UpdateUserForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['User Management']}>{withSuspense(UpdateUserForm)}</ProtectedRoute>
           } />
 
           <Route path="/setup/companysetup/access-setup" element={
-            <ProtectedRoute required={PERMISSION_ID_MAP['Access levels edition']}>{withSuspense(AddUserAccessForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['User Roles']}>{withSuspense(AddUserAccessForm)}</ProtectedRoute>
           } />
 
           <Route path="/setup/companysetup/edit-access-setup" element={
-            <ProtectedRoute required={PERMISSION_ID_MAP['Access levels edition']}>{withSuspense(UpdateUserAccessForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['User Roles']}>{withSuspense(UpdateUserAccessForm)}</ProtectedRoute>
           } />
         </Route>
       </Route>

@@ -21,37 +21,13 @@ import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal
 import { deleteSecurityRole } from "../../../api/AccessSetup/AccessSetupApi";
 
 const permissionList = [
-  "System Administration",
-  "Company Setup",
-  "Special Maintenance",
-  "Sales Configuration",
-  "Sales Transactions",
-  "Sales Related Reports",
-  "Purchase Configuration",
-  "Purchase Transactions",
-  "Purchase Analytics",
-  "Inventory Configuration",
-  "Inventory Operations",
-  "Inventory Analytics",
-  "Fixed Assets Configuration",
-  "Fixed Assets Operations",
-  "Fixed Assets Analytics",
-  "Manufacturing Configuration",
-  "Manufacturing Transactions",
-  "Manufacturing Analytics",
-  "Dimensions Configuration",
-  "Dimensions",
-  "Banking & GL Configuration",
-  "Banking & GL Transactions",
-  "Banking & GL Analytics",
+  "Data Upload",
+  "Management Incent",
+  "Setup",
 ];
 
-const systemAdminNested = [
-  "Install/Update Companies",
-  "Install/Update Languages",
-  "Install/Update Modules",
-  "Software Upgrades",
-];
+const managementNested = ["Past Year Analysis", "Next Year Analysis", "Achievement Targets"];
+const setupNested = ["Company Setup", "User Management", "User Roles"];
 
 interface UserAccessFormData {
   selectedRole: string;
@@ -91,13 +67,20 @@ export default function UpdateUserAccessForm() {
         : [...prev.permissions, permission];
 
       let filteredPermissions = newPermissions;
-      if (
-        permission === "System Administration" &&
-        !newPermissions.includes("System Administration")
-      ) {
-        filteredPermissions = newPermissions.filter(
-          (p) => !systemAdminNested.includes(p)
-        );
+      // when checked, add nested permissions; when unchecked, remove them
+      if (permission === "Management Incent") {
+        if (newPermissions.includes("Management Incent")) {
+          filteredPermissions = Array.from(new Set([...newPermissions, ...managementNested]));
+        } else {
+          filteredPermissions = newPermissions.filter((p) => !managementNested.includes(p));
+        }
+      }
+      if (permission === "Setup") {
+        if (newPermissions.includes("Setup")) {
+          filteredPermissions = Array.from(new Set([...newPermissions, ...setupNested]));
+        } else {
+          filteredPermissions = newPermissions.filter((p) => !setupNested.includes(p));
+        }
       }
 
       return { ...prev, permissions: filteredPermissions };
@@ -243,10 +226,28 @@ export default function UpdateUserAccessForm() {
                     label={perm}
                   />
 
-                  {perm === "System Administration" &&
-                    formData.permissions.includes("System Administration") && (
+                  {perm === "Management Incent" &&
+                    formData.permissions.includes("Management Incent") && (
                       <Box sx={{ pl: 4 }}>
-                        {systemAdminNested.map((nested) => (
+                        {managementNested.map((nested) => (
+                          <FormControlLabel
+                            key={nested}
+                            control={
+                              <Checkbox
+                                checked={formData.permissions.includes(nested)}
+                                onChange={() => handleNestedPermissionChange(nested)}
+                              />
+                            }
+                            label={nested}
+                          />
+                        ))}
+                      </Box>
+                    )}
+
+                  {perm === "Setup" &&
+                    formData.permissions.includes("Setup") && (
+                      <Box sx={{ pl: 4 }}>
+                        {setupNested.map((nested) => (
                           <FormControlLabel
                             key={nested}
                             control={
@@ -275,14 +276,15 @@ export default function UpdateUserAccessForm() {
           <Button onClick={() => navigate("/dashboard")}>Back</Button>
 
           <Box sx={{ display: "flex", gap: 1 }}>
-            <Button
-              variant="outlined"
-              color="error"
-              disabled={!formData.selectedRole}
-              onClick={() => setDeleteModalOpen(true)}
-            >
-              Delete
-            </Button>
+            {formData.selectedRole && (
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={() => setDeleteModalOpen(true)}
+              >
+                Delete
+              </Button>
+            )}
 
             <Button
               variant="contained"

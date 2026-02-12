@@ -361,29 +361,23 @@ const DrawerContent = ({
           Accounting
         </Typography>
       </DrawerHeader>
-      {/* <Divider sx={{ marginBottom: "1rem", }} /> */}
-      <Box
-        sx={{
-          height: "calc(100vh - 75px)",
-          overflowY: "auto",
-          paddingLeft: 0,
-          overflowX: "hidden",
-        }}
-      >
-        <Typography
-          variant="subtitle2"
-          sx={{
-            px: 2,
-            py: 1,
-            fontWeight: 600,
-            fontSize: "0.75rem",
-            letterSpacing: "0.05rem",
-          }}
-        >
-          Menu
-        </Typography>
 
-        {sidebarItems.map((item, index) => {
+      <Box sx={{ height: "calc(100vh - 75px)", display: "flex", flexDirection: "column" }}>
+        <Box sx={{ flex: 1, overflowY: "auto", paddingLeft: 0, overflowX: "hidden" }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              px: 2,
+              py: 1,
+              fontWeight: 600,
+              fontSize: "0.75rem",
+              letterSpacing: "0.05rem",
+            }}
+          >
+            Menu
+          </Typography>
+
+          {sidebarItems.map((item, index) => {
           if (item?.accessKey && !userPermissionObject[`${item?.accessKey}`])
             return null;
 
@@ -439,15 +433,9 @@ const DrawerContent = ({
         })}
 
         <Divider sx={{ backgroundColor: "var(--pallet-grey)", marginTop: "1rem", width: "80%", mx: "auto" }} />
+        </Box>
 
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            p: 2,
-          }}
-        >
-
+        <Box sx={{ p: 2 }}>
           <Typography
             variant="subtitle2"
             sx={{
@@ -485,7 +473,8 @@ const DrawerContent = ({
               backgroundColor: "#d45e6a",
               color: "white",
               borderRadius: "0.5rem",
-              px: 2,
+              width: "230px",
+              paddingY: "0.6rem",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",

@@ -34,9 +34,7 @@ export const uploadFile = async (files: File | File[], userId?: number): Promise
       formData.append('file', f);
       if (userId !== undefined) formData.append('user_id', String(userId));
 
-      const res = await api.post<{ data: UploadData }>(API_URL, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const res = await api.post<{ data: UploadData }>(API_URL, formData);
 
       // controller returns { message, data }
       const payload = (res.data as any)?.data ?? res.data;

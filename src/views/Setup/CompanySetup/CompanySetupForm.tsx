@@ -176,14 +176,21 @@ export default function CompanySetupForm() {
 
         const response = await createCompany(formDataToSend);
         if (response && response.id) {
-          navigate(`/setup/companysetup/update-company-setup/${response.id}`);
+          // show confirmation briefly then redirect to update page
+          setOpen(true);
+          setTimeout(() => {
+            setOpen(false);
+            navigate(`/setup/companysetup/update-company-setup/${response.id}`);
+          }, 1000);
         } else {
-          window.history.back();
+          setOpen(true);
+          setTimeout(() => {
+            setOpen(false);
+            window.history.back();
+          }, 1000);
         }
-        setOpen(true);
       } catch (error: any) {
         console.error("createCompany error:", error?.response?.status, error?.message || error);
-        // Do not expose API payloads or loaded data to the user. Show a generic message only.
         setErrorMessage("Failed to save company setup. Please try again.");
         setErrorOpen(true);
       }

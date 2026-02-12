@@ -54,11 +54,11 @@ const baseSidebarItems: Array<SidebarItem> = [
     href: "/dashboard",
     icon: <DashboardIcon fontSize="small" />,
   },
-  {
-    title: "Chat",
-    href: "/chat",
-    icon: <ChatIcon fontSize="small" />,
-  },
+  // {
+  //   title: "Chat",
+  //   href: "/chat",
+  //   icon: <ChatIcon fontSize="small" />,
+  // },
   {
     title: "Data Upload",
     href: "/upload-files",

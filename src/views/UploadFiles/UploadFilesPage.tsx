@@ -18,6 +18,8 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import Chip from "@mui/material/Chip";
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
 
 type StoredFile = {
   id: string;
@@ -38,6 +40,35 @@ const MIME_ACCEPT: { [key: string]: string[] } = {
   ".csv": ["text/csv", "text/plain"],
   ".json": ["application/json", "text/json"],
   ".pdf": ["application/pdf"],
+};
+
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+
+const formatBytes = (bytes: number) => {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const value = parseFloat((bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 1));
+  return `${value} ${sizes[i]}`;
+};
+
+const formatRejectionError = (err: { message: string; code?: string }, file: File) => {
+  if (err?.code === 'file-too-large') {
+    return `exceeds the maximum of ${formatBytes(MAX_FILE_SIZE)}`;
+  }
+  if (err?.code === 'file-invalid-type') {
+    return `Invalid file type`;
+  }
+  // fallback: if message contains a byte number, replace it with human-readable
+  const m = String(err?.message || '').match(/(\d{4,})/);
+  if (m) {
+    const bytes = parseInt(m[1], 10);
+    if (!Number.isNaN(bytes)) {
+      return String(err.message).replace(m[1], formatBytes(bytes));
+    }
+  }
+  return err?.message || 'File rejected';
 };
 
 const UploadFilesPage: React.FC = () => {
@@ -86,23 +117,35 @@ const UploadFilesPage: React.FC = () => {
     onDrop,
     multiple: true,
     accept: acceptObj,
-    maxSize: 50 * 1024 * 1024, // 50MB
+    maxSize: MAX_FILE_SIZE,
   });
+
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
   const removeFile = (id: string) => setFiles((prev) => prev.filter((f) => f.id !== id));
 
   const clearAll = () => setFiles([]);
 
   const handleUpload = async () => {
-    if (files.length === 0) return;
+    if (files.length === 0) {
+      setErrorMessage("No files selected to upload");
+      return;
+    }
     setUploading(true);
     try {
-      // use acceptedFiles from react-dropzone (raw File objects)
-      const rawFiles: File[] = acceptedFiles as File[];
+      // use our stored File objects
+      const rawFiles: File[] = files.map((f) => f.file).filter(Boolean) as File[];
+
       if (!rawFiles || rawFiles.length === 0) {
-        // nothing to upload
-        // eslint-disable-next-line no-alert
-        alert("No files selected to upload");
+        setErrorMessage("No files selected to upload");
+        setUploading(false);
+        return;
+      }
+
+      // client-side size validation (20MB)
+      const tooLarge = rawFiles.find((f) => f.size > MAX_FILE_SIZE);
+      if (tooLarge) {
+        setErrorMessage(`${tooLarge.name} exceeds the 20MB upload limit.`);
         setUploading(false);
         return;
       }
@@ -119,7 +162,8 @@ const UploadFilesPage: React.FC = () => {
       // Upload all files in one call (uploadFile accepts File[])
       const results = await uploadFile(rawFiles, userId);
 
-      // show success modal instead of alert
+      // clear any prior errors and show success modal
+      setErrorMessage(undefined);
       setSuccessMessage(`${results.length} file(s) uploaded`);
       setOpenSuccessModal(true);
       setFiles([]);
@@ -128,20 +172,17 @@ const UploadFilesPage: React.FC = () => {
       await loadUploadedFiles();
     } catch (err: any) {
       console.error("Upload error", err);
-      // If server returned validation errors in typical Laravel format
       const server = err?.response || err;
       const data = server?.data || err;
-      // Laravel validation errors are under data.errors
       if (data?.errors) {
-        const msgs = Object.values(data.errors).flat().join("\n");
-        // eslint-disable-next-line no-alert
-        alert(msgs);
+        // Laravel validation errors
+        const fileErrs = data.errors.file ?? [];
+        const msgs = [...fileErrs, ...(data.message ? [data.message] : [])].join(" ") || JSON.stringify(data.errors);
+        setErrorMessage(msgs);
       } else if (data?.message) {
-        // eslint-disable-next-line no-alert
-        alert(String(data.message));
+        setErrorMessage(String(data.message));
       } else {
-        // eslint-disable-next-line no-alert
-        alert("Upload failed");
+        setErrorMessage("Upload failed");
       }
     } finally {
       setUploading(false);
@@ -222,7 +263,11 @@ const UploadFilesPage: React.FC = () => {
 
             {fileRejections.length > 0 && (
               <Box sx={{ mt: 2 }}>
-                <Typography color="error" variant="body2">Some files were rejected (unsupported type or too large).</Typography>
+                {fileRejections.map((rej) => (
+                  <Alert key={rej.file.name} severity="error" sx={{ mb: 1 }}>
+                    {rej.file.name} ({formatBytes(rej.file.size)}): {rej.errors.map((e) => formatRejectionError(e, rej.file)).join("; ")}
+                  </Alert>
+                ))}
               </Box>
             )}
           </Box>
@@ -242,7 +287,7 @@ const UploadFilesPage: React.FC = () => {
                 <ListItem key={f.id} divider>
                   <ListItemText
                     primary={f.name}
-                    secondary={`${(f.size / 1024).toFixed(1)} KB • ${new Date(f.addedAt).toLocaleString()}`}
+                    secondary={`${formatBytes(f.size)} • ${new Date(f.addedAt).toLocaleString()}`}
                   />
                   <ListItemSecondaryAction>
                     <IconButton edge="end" aria-label="delete" onClick={() => removeFile(f.id)}>
@@ -253,9 +298,22 @@ const UploadFilesPage: React.FC = () => {
               ))}
             </List>
 
+            {errorMessage && (
+              <Box sx={{ mt: 1 }}>
+                <Alert severity="error">{errorMessage}</Alert>
+              </Box>
+            )}
+
             <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
-              <Button variant="contained" startIcon={<CloudUploadIcon />} onClick={handleUpload} disabled={files.length === 0}>Upload</Button>
-              <Button variant="outlined" onClick={clearAll} disabled={files.length === 0}>Clear All</Button>
+              <Button
+                variant="contained"
+                startIcon={uploading ? <CircularProgress size={16} color="inherit" /> : <CloudUploadIcon />}
+                onClick={handleUpload}
+                disabled={files.length === 0 || uploading}
+              >
+                {uploading ? "Uploading..." : "Upload"}
+              </Button>
+              <Button variant="outlined" onClick={clearAll} disabled={files.length === 0 || uploading}>Clear All</Button>
             </Box>
 
             <Divider sx={{ my: 1 }} />
