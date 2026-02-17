@@ -3,6 +3,16 @@ import HomeIcon from "@mui/icons-material/Home";
 import LayersIcon from "@mui/icons-material/Layers";
 import ChatIcon from "@mui/icons-material/Chat";
 import UploadIcon from "@mui/icons-material/Upload";
+import SalesIcon from "@mui/icons-material/PointOfSale";
+import ExpensesIcon from "@mui/icons-material/ReceiptLong";
+import ProductionIcon from "@mui/icons-material/Factory";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import BankIcon from "@mui/icons-material/AccountBalance";
+import LoanIcon from "@mui/icons-material/MonetizationOn";
+import CreditorsIcon from "@mui/icons-material/Group";
+import DebtorsIcon from "@mui/icons-material/People";
+import ReportsIcon from "@mui/icons-material/BarChart";
+import UserIcon from "@mui/icons-material/Person";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 import SpaIcon from "@mui/icons-material/Spa";
@@ -54,11 +64,177 @@ const baseSidebarItems: Array<SidebarItem> = [
     href: "/dashboard",
     icon: <DashboardIcon fontSize="small" />,
   },
-  // {
-  //   title: "Chat",
-  //   href: "/chat",
-  //   icon: <ChatIcon fontSize="small" />,
-  // },
+  {
+    title: "Sales Management",
+    href: "/sales",
+    icon: <SalesIcon fontSize="small" />,
+    nestedItems: [
+      {
+        title: "Add Sale",
+        href: "/sales/add-sale",
+      },
+      {
+        title: "View Sales",
+        href: "/sales/view-sales",
+      },
+      {
+        title: "Sales Reports",
+        href: "/sales/sales-reports",
+      },
+    ],
+  },
+  {
+    title: "Expense Management",
+    href: "/expenses",
+    icon: <ExpensesIcon fontSize="small" />,
+    nestedItems: [
+      {
+        title: "Add Expense",
+        href: "/expenses/add-expense",
+      },
+      {
+        title: "View Expenses",
+        href: "/expenses/view-expenses",
+      },
+      {
+        title: "Expense Reports",
+        href: "/expenses/expense-reports",
+      },
+    ],
+  },
+  {
+    title: "Production Management",
+    href: "/production",
+    icon: <ProductionIcon fontSize="small" />,
+    nestedItems: [
+      {
+        title: "Add Production",
+        href: "/production/add-production",
+      },
+      {
+        title: "View Production",
+        href: "/production/view-production",
+      },
+      {
+        title: "Production Reports",
+        href: "/production/production-reports",
+      },
+    ],
+  },
+  {
+    title: "Inventory Management",
+    href: "/inventory",
+    icon: <InventoryIcon fontSize="small" />,
+    nestedItems: [
+      {
+        title: "Items",
+        href: "/inventory/items",
+      },
+      {
+        title: "Stock List",
+        href: "/inventory/stock-list",
+      },
+      {
+        title: "Stock Reports",
+        href: "/inventory/stock-reports",
+      },
+    ],
+  },
+  {
+    title: "Bank Management",
+    href: "/bank",
+    icon: <BankIcon fontSize="small" />,
+    nestedItems: [
+      {
+        title: "Bank Accounts",
+        href: "/bank/bank-accounts",
+      },
+      {
+        title: "Bank Transactions",
+        href: "/bank/bank-transactions",
+      },
+      {
+        title: "Bank Reports",
+        href: "/bank/bank-reports",
+      },
+    ],
+  },
+  {
+    title: "Loan Management",
+    href: "/loan",
+    icon: <LoanIcon fontSize="small" />,
+    nestedItems: [
+      {
+        title: "Add Loan",
+        href: "/loan/add-loan",
+      },
+      {
+        title: "Loan Installments",
+        href: "/loan/loan-installments",
+      },
+      {
+        title: "Loan Reports",
+        href: "/loan/loan-reports",
+      },
+    ],
+  },
+  {
+    title: "Creditors Management",
+    href: "/creditors",
+    icon: <CreditorsIcon fontSize="small" />,
+    nestedItems: [
+      {
+        title: "Suppliers",
+        href: "/creditors/suppliers",
+      },
+      {
+        title: "Creditors List",
+        href: "/creditors/creditors-list",
+      },
+    ],
+  },
+  {
+    title: "Debtors Management",
+    href: "/debtors",
+    icon: <DebtorsIcon fontSize="small" />,
+    nestedItems: [
+      {
+        title: "Customers",
+        href: "/debtors/customers",
+      },
+      {
+        title: "Debtors List",
+        href: "/debtors/debtors-list",
+      },
+    ],
+  },
+  {
+    title: "Reports",
+    href: "/reports",
+    icon: <ReportsIcon fontSize="small" />,
+    nestedItems: [
+      {
+        title: "Sales Reports",
+        href: "/reports/sales-reports",
+      },
+      {
+        title: "Expense Reports",
+        href: "/reports/expense-reports",
+      },
+      {
+        title: "Production Reports",
+        href: "/reports/production-reports",
+      },
+      {
+        title: "Profit Reports",
+        href: "/reports/profit-reports",
+      },
+      {
+        title: "Stock Reports",
+        href: "/reports/stock-reports",
+      },
+    ],
+  },
   {
     title: "Data Upload",
     href: "/upload-files",
@@ -66,7 +242,7 @@ const baseSidebarItems: Array<SidebarItem> = [
   },
   {
     title: "Management Incent",
-    href: "/purchase",
+    href: "/management",
     icon: <ForestIcon fontSize="small" />,
     nestedItems: [
       {
@@ -83,105 +259,22 @@ const baseSidebarItems: Array<SidebarItem> = [
       },
     ],
   },
-  // {
-  //   title: "Item and inventory",
-  //   href: "/itemsandinventory",
-  //   icon: <FolderIcon fontSize="small" />,
-  //   nestedItems: [
-  //     {
-  //       title: "Transactions",
-  //       href: "/itemsandinventory/transactions",
-  //     },
-  //     {
-  //       title: "Inquiries and Reports",
-  //       href: "/itemsandinventory/inquiriesandreports",
-  //     },
-  //     {
-  //       title: "Maintenance",
-  //       href: "/itemsandinventory/maintenance",
-  //     },
-  //     {
-  //       title: "Pricing and Costs",
-  //       href: "/itemsandinventory/pricingandcosts",
-  //     },
-  //   ],
-  // },
-  // {
-  //   title: "Manufacturing",
-  //   href: "/manufacturing",
-  //   icon: <ScienceIcon fontSize="small" />,
-  //   nestedItems: [
-  //     {
-  //       title: "Transactions",
-  //       href: "/manufacturing/transactions",
-  //     },
-  //     {
-  //       title: "Inquiries and Reports",
-  //       href: "/manufacturing/inquiriesandreports",
-  //     },
-  //     {
-  //       title: "Maintenance",
-  //       href: "/manufacturing/maintenance",
-  //     },
-  //   ],
-  // },
-  // {
-  //   title: "Fixed Assets",
-  //   href: "/fixedassets",
-  //   icon: <EmergencyIcon fontSize="small" />,
-  //   nestedItems: [
-  //     {
-  //       title: "Transactions",
-  //       href: "/fixedassets/transactions",
-  //     },
-  //     {
-  //       title: "Inquiries and Reports",
-  //       href: "/fixedassets/inquiriesandreports",
-  //     },
-  //     {
-  //       title: "Maintenance",
-  //       href: "/fixedassets/maintenance",
-  //     },
-  //   ],
-  // },
-  // {
-  //   title: "Dimension",
-  //   href: "/dimension",
-  //   icon: <ChangeHistoryIcon fontSize="small" />,
-  //   nestedItems: [
-  //     {
-  //       title: "Transactions",
-  //       href: "/dimension/transactions",
-  //     },
-  //     {
-  //       title: "Inquiries and Reports",
-  //       href: "/dimension/inquiriesandreports",
-  //     },
-  //     {
-  //       title: "Maintenance",
-  //       href: "/dimension/maintenance",
-  //     },
-  //   ],
-  // },
-  // {
-  //   title: "Banking And General ledger",
-  //   href: "/bankingandgeneralledger",
-  //   icon: <PeopleAltIcon fontSize="small" />,
-  //   nestedItems: [
-  //     {
-  //       title: "Transactions",
-  //       href: "/bankingandgeneralledger/transactions",
-  //     },
-  //     {
-  //       title: "Inquiries and Reports",
-  //       href: "/bankingandgeneralledger/inquiriesandreports",
-  //     },
-  //     {
-  //       title: "Maintenance",
-  //       href: "/bankingandgeneralledger/maintenance",
-  //     },
-  //   ],
-  // },
+  {
+    title: "User Management",
+    href: "/setup",
+    icon: <UserIcon fontSize="small" />,
+    nestedItems: [
+      {
+        title: "User Management",
+        href: "/setup/companysetup/user-account-setup",
+      },
+      {
+        title: "User Roles",
+        href: "/setup/companysetup/access-setup",
+      },
+    ],
+  },
+
 ];
 
 // NEW: Export a function that returns filtered items based on user role
@@ -193,21 +286,17 @@ export const getSidebarItems = (canAccessSetup = false): Array<SidebarItem> => {
 
   if (canAccessSetup) {
     items.push({
-      title: "Setup",
-      href: "/setup",
+      title: "Settings",
+      href: "/settings",
       icon: <SettingsOutlinedIcon fontSize="small" />,
       nestedItems: [
         {
           title: "Company Setup",
-          href: "/setup/companysetup/company-setup",
+          href: "/settings/companysetup/company-setup",
         },
         {
-          title: "User Management",
-          href: "/setup/companysetup/user-account-setup",
-        },
-        {
-          title: "User Roles",
-          href: "/setup/companysetup/access-setup",
+          title: "Profile Settings",
+          href: "/settings/profile",
         },
       ],
     });

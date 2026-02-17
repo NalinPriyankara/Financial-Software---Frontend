@@ -25,6 +25,9 @@ import UpdateCompanySetupForm from "./views/Setup/CompanySetup/UpdateCompanySetu
 import AchievementTargetForm from "./views/Management/AchievementTarget/AchievementTargetForm";
 import NextYearForecast from "./views/Management/NextYearForecast/NextYearForecast";
 import PastYearAnalysis from "./views/Management/PastYearAnalysis/PastYearAnalysis";
+import SalesTable from "./views/Sales/SalesTable";
+import AddSalesForm from "./views/Sales/AddSalesForm";
+import UpdateSalesForm from "./views/Sales/UpdateSalesForm";
 
 const LoginPage = React.lazy(() => import("./views/LoginPage/LoginPage"));
 
@@ -70,6 +73,18 @@ const AppRoutes = () => {
             <ProtectedRoute required={PERMISSION_ID_MAP['Data Upload']}>{withSuspense(UploadFilesPage)}</ProtectedRoute>
           } />
 
+
+          <Route path="/sales/view-sales" element={
+            <ProtectedRoute>{withSuspense(SalesTable)}</ProtectedRoute>
+          } />
+          <Route path="/sales/add-sale" element={
+            <ProtectedRoute>{withSuspense(AddSalesForm)}</ProtectedRoute>
+          } />
+          <Route path="/sales/update-sale/:id" element={
+            <ProtectedRoute>{withSuspense(UpdateSalesForm)}</ProtectedRoute>
+          } />
+          
+
           <Route path="/management/achievement-target" element={
             <ProtectedRoute required={PERMISSION_ID_MAP['Achievement Targets']}>{withSuspense(AchievementTargetForm)}</ProtectedRoute>
           } />
@@ -80,11 +95,14 @@ const AppRoutes = () => {
             <ProtectedRoute required={PERMISSION_ID_MAP['Past Year Analysis']}>{withSuspense(PastYearAnalysis)}</ProtectedRoute>
           } />
 
-          <Route path="/setup/companysetup/company-setup" element={
+
+          <Route path="/settings/companysetup/company-setup" element={
             <ProtectedRoute required={PERMISSION_ID_MAP['Company Setup']}>{withSuspense(CompanySetupForm)}</ProtectedRoute>
           } />
 
-          <Route path="/setup/companysetup/update-company-setup/:id" element={withSuspense(UpdateCompanySetupForm)} />
+          <Route path="/settings/companysetup/update-company-setup/:id" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['Company Setup']}>{withSuspense(UpdateCompanySetupForm)}</ProtectedRoute>
+          } />
 
           <Route path="/setup/companysetup/user-account-setup" element={
             <ProtectedRoute required={PERMISSION_ID_MAP['User Management']}>{withSuspense(UserManagementTable)}</ProtectedRoute>
