@@ -70,12 +70,12 @@ const baseSidebarItems: Array<SidebarItem> = [
     icon: <SalesIcon fontSize="small" />,
     nestedItems: [
       {
-        title: "Add Sale",
-        href: "/sales/add-sale",
+        title: "Sale",
+        href: "/sales/view-sales",
       },
       {
-        title: "View Sales",
-        href: "/sales/view-sales",
+        title: "Sale Items",
+        href: "/sales/view-sale-items",
       },
       {
         title: "Sales Reports",
@@ -108,12 +108,12 @@ const baseSidebarItems: Array<SidebarItem> = [
     icon: <ProductionIcon fontSize="small" />,
     nestedItems: [
       {
-        title: "Add Production",
-        href: "/production/add-production",
+        title: "Production",
+        href: "/production/view-productions",
       },
       {
-        title: "View Production",
-        href: "/production/view-production",
+        title: "Production Items",
+        href: "/production/view-production-items",
       },
       {
         title: "Production Reports",
@@ -128,7 +128,7 @@ const baseSidebarItems: Array<SidebarItem> = [
     nestedItems: [
       {
         title: "Items",
-        href: "/inventory/items",
+        href: "/inventory/view-items",
       },
       {
         title: "Stock List",
@@ -147,11 +147,11 @@ const baseSidebarItems: Array<SidebarItem> = [
     nestedItems: [
       {
         title: "Bank Accounts",
-        href: "/bank/bank-accounts",
+        href: "/bank/view-bank-accounts",
       },
       {
         title: "Bank Transactions",
-        href: "/bank/bank-transactions",
+        href: "/bank/view-bank-transactions",
       },
       {
         title: "Bank Reports",
@@ -166,11 +166,11 @@ const baseSidebarItems: Array<SidebarItem> = [
     nestedItems: [
       {
         title: "Add Loan",
-        href: "/loan/add-loan",
+        href: "/loan/view-loans",
       },
       {
         title: "Loan Installments",
-        href: "/loan/loan-installments",
+        href: "/loan/view-loan-installments",
       },
       {
         title: "Loan Reports",
