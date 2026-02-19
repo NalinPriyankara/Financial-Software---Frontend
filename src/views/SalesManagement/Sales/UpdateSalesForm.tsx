@@ -57,6 +57,13 @@ export default function UpdateSalesForm() {
   });
   const { id } = useParams<{ id: string }>();
 
+  const usersCache: any[] = queryClient.getQueryData(["users"]) ?? [];
+  const createdByName = (() => {
+    const u = (usersCache || []).find((usr: any) => String(usr.id) === String(formData.created_by));
+    if (u) return u.first_name || `${u.first_name ?? ""} ${u.last_name ?? ""}`.trim();
+    return formData.created_by;
+  })();
+
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -194,7 +201,7 @@ export default function UpdateSalesForm() {
           <TextField label="Total Amount" name="total_amount" type="number" size="small" fullWidth value={formData.total_amount} onChange={handleChange} error={!!errors.total_amount} helperText={errors.total_amount} />
           <TextField label="Paid Amount" name="paid_amount" type="number" size="small" fullWidth value={formData.paid_amount} onChange={handleChange} error={!!errors.paid_amount} helperText={errors.paid_amount} />
           <TextField label="Sale Date" name="sale_date" type="date" size="small" fullWidth value={formData.sale_date} onChange={handleChange} InputLabelProps={{ shrink: true }} error={!!errors.sale_date} helperText={errors.sale_date} />
-          <TextField label="Created By (User ID)" name="created_by" size="small" fullWidth value={formData.created_by} onChange={handleChange} error={!!errors.created_by} helperText={errors.created_by} disabled />
+          <TextField label="Created By" name="created_by" size="small" fullWidth value={createdByName} error={!!errors.created_by} helperText={errors.created_by} disabled />
         </Stack>
 
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3, flexDirection: isMobile ? "column" : "row", gap: isMobile ? 2 : 0 }}>

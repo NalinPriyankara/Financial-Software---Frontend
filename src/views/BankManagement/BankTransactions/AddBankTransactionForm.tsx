@@ -55,6 +55,28 @@ export default function AddBankTransactionForm() {
     if (!validate()) return;
     try {
       const payload = { bank_account_id: Number(form.bank_account_id), type: form.type as any, amount: Number(form.amount), transaction_date: form.transaction_date, description: form.description || undefined };
+
+      // If withdraw, ensure account has sufficient balance before creating transaction
+      const txAmount = Number(payload.amount || 0);
+      const accountId = Number(payload.bank_account_id);
+      const accountsCached: any = queryClient.getQueryData(["bank-accounts"]);
+      const cachedList = Array.isArray(accountsCached) ? accountsCached : (accountsCached as any)?.data ?? [];
+      let account: any = cachedList.find((a: any) => Number(a.id) === accountId);
+      if (!account) {
+        try {
+          const accRes = await getBankAccount(accountId);
+          account = accRes?.data ?? accRes;
+        } catch (fetchErr) {
+          console.warn("Failed to fetch bank account for validation", fetchErr);
+        }
+      }
+
+      const currentBal = Number(account?.balance ?? 0);
+      if (payload.type === "withdraw" && currentBal < txAmount) {
+        setErrors((p) => ({ ...p, amount: "Insufficient balance in selected account" }));
+        return;
+      }
+
       const res = await createBankTransaction(payload as any);
       const created = res?.data ?? res;
 
