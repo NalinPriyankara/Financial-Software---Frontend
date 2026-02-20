@@ -13,25 +13,8 @@ import CreditorsIcon from "@mui/icons-material/Group";
 import DebtorsIcon from "@mui/icons-material/People";
 import ReportsIcon from "@mui/icons-material/BarChart";
 import UserIcon from "@mui/icons-material/Person";
-import QueryStatsIcon from "@mui/icons-material/QueryStats";
-import TravelExploreIcon from "@mui/icons-material/TravelExplore";
-import SpaIcon from "@mui/icons-material/Spa";
 import ForestIcon from "@mui/icons-material/Forest";
-import ScienceIcon from "@mui/icons-material/Science";
-import EmergencyIcon from "@mui/icons-material/Emergency";
-import ChangeHistoryIcon from "@mui/icons-material/ChangeHistory";
-import FolderIcon from "@mui/icons-material/Folder";
-import ConstructionIcon from "@mui/icons-material/Construction";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import PollOutlinedIcon from "@mui/icons-material/PollOutlined";
-import PersonRemoveOutlinedIcon from "@mui/icons-material/PersonRemoveOutlined";
-import DatasetLinkedOutlinedIcon from "@mui/icons-material/DatasetLinkedOutlined";
-import SentimentSatisfiedAltOutlinedIcon from "@mui/icons-material/SentimentSatisfiedAltOutlined";
-import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
-import SubdirectoryArrowRightIcon from "@mui/icons-material/SubdirectoryArrowRight";
-import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import KeyIcon from "@mui/icons-material/Key";
 
 export interface SidebarItem {
   title?: string;
@@ -79,7 +62,7 @@ const baseSidebarItems: Array<SidebarItem> = [
       },
       {
         title: "Sales Reports",
-        href: "/sales/sales-reports",
+        href: "/sales/report",
       },
     ],
   },
@@ -215,7 +198,7 @@ const baseSidebarItems: Array<SidebarItem> = [
     nestedItems: [
       {
         title: "Sales Reports",
-        href: "/reports/sales-reports",
+        href: "/sales/report",
       },
       {
         title: "Expense Reports",
@@ -261,26 +244,22 @@ const baseSidebarItems: Array<SidebarItem> = [
   },
   {
     title: "User Management",
-    href: "/setup",
+    href: "/user-management",
     icon: <UserIcon fontSize="small" />,
     nestedItems: [
       {
         title: "User Management",
-        href: "/setup/companysetup/user-account-setup",
+        href: "/user-management/user-account-setup",
       },
       {
         title: "User Roles",
-        href: "/setup/companysetup/access-setup",
+        href: "/user-management/access-setup",
       },
     ],
   },
 
 ];
 
-// NEW: Export a function that returns filtered items based on user role
-// getSidebarItems now accepts a permission flag indicating whether the
-// current user can access the Setup section. This lets the caller (layout)
-// decide based on role/permissions instead of hardcoding an Admin check.
 export const getSidebarItems = (canAccessSetup = false): Array<SidebarItem> => {
   const items = [...baseSidebarItems];
 

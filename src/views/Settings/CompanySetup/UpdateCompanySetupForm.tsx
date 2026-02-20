@@ -295,7 +295,7 @@ export default function UpdateCompanySetupForm() {
         </Box>
       </Paper>
 
-      <AddedConfirmationModal open={open} title="Success" content="Company setup has been saved successfully!" addFunc={async () => { }} handleClose={() => setOpen(false)} onSuccess={() => navigate("/setup/companysetup/company-setup")} />
+      <AddedConfirmationModal open={open} title="Success" content="Company setup has been saved successfully!" addFunc={async () => { }} handleClose={() => setOpen(false)} onSuccess={() => navigate("/settings/companysetup/company-setup")} />
       <ErrorModal open={errorOpen} onClose={() => setErrorOpen(false)} message={errorMessage} />
     </Stack>
   );

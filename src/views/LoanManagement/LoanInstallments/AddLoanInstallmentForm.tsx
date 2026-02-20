@@ -6,7 +6,7 @@ import theme from "../../../theme";
 import UpdateConfirmationModal from "../../../components/UpdateConfirmationModal";
 import ErrorModal from "../../../components/ErrorModal";
 import { createLoanInstallment } from "../../../api/LoanInstallments/loanInstallmentsApi";
-import { getLoans } from "../../../api/Loans/loansApi";
+import { getLoans, getLoanById, updateLoan } from "../../../api/Loans/loansApi";
 
 interface FormState {
   loan_id: string;
@@ -44,8 +44,87 @@ export default function AddLoanInstallmentForm() {
     if (!validate()) return;
     try {
       const payload = { loan_id: Number(form.loan_id), amount: Number(form.amount), payment_date: form.payment_date };
+
+      // Validate against loan remaining balance
+      try {
+        const loanId = Number(payload.loan_id);
+        const cachedLoans: any[] | undefined = queryClient.getQueryData(["loans"]);
+        let loanObj: any | undefined;
+        if (Array.isArray(cachedLoans)) loanObj = cachedLoans.find((l) => Number(l.id) === loanId);
+        if (!loanObj) {
+          try {
+            loanObj = await getLoanById(loanId);
+          } catch (_e) {
+            loanObj = undefined;
+          }
+        }
+
+        if (loanObj) {
+          const total = Number(loanObj.total_amount ?? 0);
+          const paid = Number(loanObj.paid_amount ?? 0);
+          const remaining = total - paid;
+          if (Number(payload.amount) > remaining) {
+            setErrors((p) => ({ ...p, amount: `Amount exceeds remaining balance (${remaining.toFixed(2)})` }));
+            return;
+          }
+        }
+      } catch (_e) {
+        // ignore validation failure and proceed to let server handle it
+      }
+
       const res = await createLoanInstallment(payload as any);
-      const created = res?.data ?? res;
+      const createdRaw = res?.data ?? res;
+      const created = createdRaw?.data ?? createdRaw; // normalize nested data responses
+
+      // Update the corresponding loan's paid_amount and balance
+      try {
+        const loanId = Number(payload.loan_id);
+        // Try to find loan in cache
+        const cachedLoans: any[] | undefined = queryClient.getQueryData(["loans"]);
+        let existingLoan: any | undefined;
+        if (Array.isArray(cachedLoans)) existingLoan = cachedLoans.find((l) => Number(l.id) === loanId);
+        if (!existingLoan) {
+          // fallback to API
+          try {
+            existingLoan = (await getLoanById(loanId)) as any;
+          } catch (_e) {
+            existingLoan = undefined;
+          }
+        }
+
+        if (existingLoan) {
+          const prevPaid = Number(existingLoan.paid_amount ?? 0);
+          const add = Number(created.amount ?? payload.amount ?? 0);
+          const newPaid = prevPaid + add;
+          const total = Number(existingLoan.total_amount ?? 0);
+          const newBalance = total - newPaid;
+
+          const loanPayload: any = {
+            loan_name: existingLoan.loan_name ?? existingLoan.name ?? "",
+            total_amount: total,
+            paid_amount: newPaid,
+            balance: newBalance,
+            interest_rate: existingLoan.interest_rate ?? null,
+            start_date: existingLoan.start_date ? String(existingLoan.start_date).split("T")[0] : (existingLoan.start_date ?? ""),
+            end_date: existingLoan.end_date ?? null,
+          };
+
+          try {
+            await updateLoan(loanId, loanPayload);
+            // Update loans cache optimistically
+            queryClient.setQueryData(["loans"], (old: any) => {
+              if (!old) return [ { ...existingLoan, ...loanPayload, id: loanId } ];
+              if (Array.isArray(old)) return old.map((l) => (Number(l.id) === loanId ? { ...l, ...loanPayload, id: loanId } : l));
+              if (old?.data && Array.isArray(old.data)) return { ...old, data: old.data.map((l: any) => (Number(l.id) === loanId ? { ...l, ...loanPayload, id: loanId } : l)) };
+              return old;
+            });
+          } catch (_e) {
+            // ignore update failure here; server may reject partial updates
+          }
+        }
+      } catch (_e) {
+        // swallow errors to avoid blocking installment creation
+      }
 
       queryClient.setQueryData(["loan-installments"], (old: any) => {
         if (!old) return [created];
@@ -55,7 +134,11 @@ export default function AddLoanInstallmentForm() {
       });
 
       // Ensure server-authoritative data is shown (covers axios-response vs raw-array shapes)
-      queryClient.invalidateQueries({ queryKey: ["loan-installments"] });
+      try {
+        await queryClient.invalidateQueries({ queryKey: ["loan-installments"] });
+      } catch (_e) {
+        // ignore
+      }
 
       setOpen(true);
     } catch (err: any) {

@@ -154,7 +154,7 @@ export default function LoansTable() {
                     <TableCell>{r.loan_name}</TableCell>
                     <TableCell>{Number(r.total_amount ?? 0).toFixed(2)}</TableCell>
                     <TableCell>{Number(r.paid_amount ?? 0).toFixed(2)}</TableCell>
-                    <TableCell>{Number(r.balance ?? 0).toFixed(2)}</TableCell>
+                    <TableCell>{Math.abs(Number(r.balance ?? 0)) < 0.0001 ? "Complete" : Number(r.balance ?? 0).toFixed(2)}</TableCell>
                     <TableCell>{r.interest_rate ?? "-"}</TableCell>
                     <TableCell>{r.start_date}</TableCell>
                     <TableCell>{r.end_date ?? "-"}</TableCell>

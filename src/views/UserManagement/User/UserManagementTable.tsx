@@ -136,7 +136,7 @@ export default function UserManagementTable() {
           <Button
             variant="contained"
             color="primary"
-            onClick={() => navigate("/setup/companysetup/add-user")}
+            onClick={() => navigate("/user-management/add-user")}
           >
             Add User
           </Button>
@@ -197,7 +197,7 @@ export default function UserManagementTable() {
                           variant="contained"
                           size="small"
                           startIcon={<EditIcon />}
-                          onClick={() => navigate(`/setup/companysetup/update-user/${user.id}`)}
+                          onClick={() => navigate(`/user-management/update-user/${user.id}`)}
                         >
                           Edit
                         </Button>

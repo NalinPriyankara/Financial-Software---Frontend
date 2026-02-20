@@ -32,9 +32,19 @@ import { useEffect } from "react";
 import { PERMISSION_ID_MAP } from "../../../permissions/map";
 
 const permissionList = [
+  "Sales Management",
+  "Expense Management",
+  "Production Management",
+  "Inventory Management",
+  "Bank Management",
+  "Loan Management",
+  "Creditors Management",
+  "Debtors Management",
+  "Reports",
   "Data Upload",
   "Management Incent",
-  "Setup",
+  "User Management",
+  "Settings",
 ];
 
 const managementNested = [
@@ -43,135 +53,36 @@ const managementNested = [
   "Achievement Targets",
 ];
 
-const setupNested = [
+const settingsNested = [
   "Company Setup",
-  "User Management",
-  "User Roles",
+  "Profile Settings",
 ];
 
-const purchaseTransactionsNested = [
-  "Supplier transactions view",
-  "Suppliers changes",
-  "Purchase order entry",
-  "Purchase receive",
-  "Supplier invoices",
-  "Deleting GRN items during invoice entry",
-  "Supplier credit notes",
-  "Supplier payments",
-  "Supplier payments allocations"
-];
+const salesNested = ["Sale", "Sale Items", "Sales Reports"];
+const expenseNested = ["Add Expense", "View Expenses", "Expense Reports"];
+const productionNested = ["Production", "Production Items", "Production Reports"];
+const inventoryNested = ["Items", "Stock List", "Stock Reports"];
+const bankNested = ["Bank Accounts", "Bank Transactions", "Bank Reports"];
+const loanNested = ["Add Loan", "Loan Installments", "Loan Reports"];
+const creditorsNested = ["Suppliers", "Creditors List"];
+const debtorsNested = ["Customers", "Debtors List"];
+const reportsNested = ["Profit Reports"];
+const userManagementNested = ["User Account Setup", "User Roles Management"];
 
-const purchaseAnalyticsNested = [
-  "Supplier analytical reports",
-  "Supplier document bulk reports",
-  "Supplier payments report"
-];
-
-const inventoryConfigurationNested = [
-  "Stock items add/edit",
-  "Sales kits",
-  "Item categories",
-  "Units of measure"
-];
-
-const inventoryOperationsNested = [
-  "Stock status view",
-  "Stock transactions view",
-  "Foreign item codes entry",
-  "Inventory location transfers",
-  "Inventory adjustments"
-];
-
-const inventoryAnalyticsNested = [
-  "Reorder levels",
-  "Items analytical reports and inquiries",
-  "Inventory valuation report"
-];
-
-const fixedAssetsConfigurationNested = [
-  "Fixed Asset items add/edit",
-  "Fixed Asset categories",
-  "Fixed Asset classes"
-];
-
-const fixedAssetsOperationsNested = [
-  "Fixed Asset transactions view",
-  "Fixed Asset location transfers",
-  "Fixed Asset disposals",
-  "Depreciation"
-];
-
-const fixedAssetsAnalyticsNested = [
-  "Fixed Asset analytical reports and inquiries"
-];
-
-const manufacturingConfigurationNested = [
-  "Bill of Materials",
-];
-
-const manufacturingTransactionsNested = [
-  "Manufacturing operations view",
-  "Work order entry",
-  "Material issues entry",
-  "Final product receive",
-  "Work order releases"
-];
-
-const manufacturingAnalyticsNested = [
-  "Work order analytical reports and inquiries",
-  "Manufacturing cost inquiry",
-  "Work order bulk reports",
-  "Bill of materials reports"
-];
-
-const dimensionsConfigurationNested = [
-  "Dimension tags"
-];
-
-const dimensionsNested = [
-  "Dimension view",
-  "Dimension entry",
-  "Dimension reports"
-];
-
-const bankingGLConfigurationNested = [
-  "Item tax type definitions",
-  "GL accounts edition",
-  "GL account groups",
-  "GL account classes",
-  "Quick GL entry definitions",
-  "Currencies",
-  "Bank accounts",
-  "Tax rates",
-  "Tax groups",
-  "Fiscal years maintenance",
-  "Company GL setup",
-  "GL Account tags",
-  "Closing GL transactions",
-  "Allow entry on non closed Fiscal years"
-];
-
-const bankingGLTransactionsNested = [
-  "Bank transactions view",
-  "GL postings view",
-  "Exchange rate table changes",
-  "Bank payments",
-  "Bank deposits",
-  "Bank account transfers",
-  "Bank reconciliation",
-  "Manual journal entries",
-  "Journal entries to bank related accounts",
-  "Budget edition",
-  "Item standard costs",
-  "Revenue / Cost Accruals"
-];
-
-const bankingGLAnalyticsNested = [
-  "GL analytical reports and inquiries",
-  "Tax reports and inquiries",
-  "Bank reports and inquiries",
-  "GL reports and inquiries"
-]
+const SECTION_NESTED_MAP: Record<string, string[]> = {
+  "Management Incent": managementNested,
+  "Settings": settingsNested,
+  "Sales Management": salesNested,
+  "Expense Management": expenseNested,
+  "Production Management": productionNested,
+  "Inventory Management": inventoryNested,
+  "Bank Management": bankNested,
+  "Loan Management": loanNested,
+  "Creditors Management": creditorsNested,
+  "Debtors Management": debtorsNested,
+  "Reports": reportsNested,
+  "User Management": userManagementNested,
+};
 
 // Permission -> ID mapping (complete, easy-to-follow)
 // Pattern used:
@@ -300,21 +211,13 @@ export default function AddUserAccessForm() {
 
       // If a top-level section is unchecked, remove its nested permissions
       let filteredPermissions = newPermissions;
-      // when checked, also add nested permissions by default
-      if (permission === "Management Incent") {
-        if (newPermissions.includes("Management Incent")) {
-          // add nested items
-          filteredPermissions = Array.from(new Set([...newPermissions, ...managementNested]));
+      // when a section is checked, add its nested items; when unchecked, remove them
+      const nested = SECTION_NESTED_MAP[permission];
+      if (nested && nested.length) {
+        if (newPermissions.includes(permission)) {
+          filteredPermissions = Array.from(new Set([...newPermissions, ...nested]));
         } else {
-          // removed: clear nested
-          filteredPermissions = newPermissions.filter((p) => !managementNested.includes(p));
-        }
-      }
-      if (permission === "Setup") {
-        if (newPermissions.includes("Setup")) {
-          filteredPermissions = Array.from(new Set([...newPermissions, ...setupNested]));
-        } else {
-          filteredPermissions = newPermissions.filter((p) => !setupNested.includes(p));
+          filteredPermissions = newPermissions.filter((p) => !nested.includes(p));
         }
       }
 
@@ -572,41 +475,22 @@ export default function AddUserAccessForm() {
                     label={perm}
                   />
 
-                  {perm === "Management Incent" &&
-                    formData.permissions.includes("Management Incent") && (
-                      <Box sx={{ pl: 4 }}>
-                        {managementNested.map((nested) => (
-                          <FormControlLabel
-                            key={nested}
-                            control={
-                              <Checkbox
-                                checked={formData.permissions.includes(nested)}
-                                onChange={() => handleNestedPermissionChange(nested)}
-                              />
-                            }
-                            label={nested}
-                          />
-                        ))}
-                      </Box>
-                    )}
-
-                  {perm === "Setup" &&
-                    formData.permissions.includes("Setup") && (
-                      <Box sx={{ pl: 4 }}>
-                        {setupNested.map((nested) => (
-                          <FormControlLabel
-                            key={nested}
-                            control={
-                              <Checkbox
-                                checked={formData.permissions.includes(nested)}
-                                onChange={() => handleNestedPermissionChange(nested)}
-                              />
-                            }
-                            label={nested}
-                          />
-                        ))}
-                      </Box>
-                    )}
+                  {SECTION_NESTED_MAP[perm] && formData.permissions.includes(perm) && (
+                    <Box sx={{ pl: 4 }}>
+                      {SECTION_NESTED_MAP[perm].map((nested) => (
+                        <FormControlLabel
+                          key={nested}
+                          control={
+                            <Checkbox
+                              checked={formData.permissions.includes(nested)}
+                              onChange={() => handleNestedPermissionChange(nested)}
+                            />
+                          }
+                          label={nested}
+                        />
+                      ))}
+                    </Box>
+                  )}
                 </Box>
               ))}
             </FormGroup>

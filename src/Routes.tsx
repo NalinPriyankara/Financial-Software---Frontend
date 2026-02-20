@@ -11,17 +11,18 @@ import { User, validateUser } from "./api/userApi";
 import Dashboard from "./views/Dashboard/Dashboard";
 import AIChat from "./views/Chat/AIChat";
 import UploadFilesPage from "./views/UploadFiles/UploadFilesPage";
-import AddUserForm from "./views/Setup/User/AddUserForm";
-import UserManagementTable from "./views/Setup/User/UserManagementTable";
-import UserAccessForm from "./views/Setup/UserAccess/AddUserAccessForm";
-import AddUserAccessForm from "./views/Setup/UserAccess/AddUserAccessForm";
-import UpdateUserAccessForm from "./views/Setup/UserAccess/UpdateUserAccessForm";
-import UpdateUserForm from "./views/Setup/User/UpdateUserForm";
+import AddUserForm from "./views/UserManagement/User/AddUserForm";
+import UserManagementTable from "./views/UserManagement/User/UserManagementTable";
+import UserAccessForm from "./views/UserManagement/UserAccess/AddUserAccessForm";
+import AddUserAccessForm from "./views/UserManagement/UserAccess/AddUserAccessForm";
+import UpdateUserAccessForm from "./views/UserManagement/UserAccess/UpdateUserAccessForm";
+import UpdateUserForm from "./views/UserManagement/User/UpdateUserForm";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { PERMISSION_ID_MAP } from "./permissions/map";
-import CompanySetupForm from "./views/Setup/CompanySetup/CompanySetupForm";
-import UpdateCompanySetupForm from "./views/Setup/CompanySetup/UpdateCompanySetupForm";
+import CompanySetupForm from "./views/Settings/CompanySetup/CompanySetupForm";
+import UpdateCompanySetupForm from "./views/Settings/CompanySetup/UpdateCompanySetupForm";
+import ViewUserProfileContent from "./views/Administration/ViewUserProfileContent";
 import AchievementTargetForm from "./views/Management/AchievementTarget/AchievementTargetForm";
 import NextYearForecast from "./views/Management/NextYearForecast/NextYearForecast";
 import PastYearAnalysis from "./views/Management/PastYearAnalysis/PastYearAnalysis";
@@ -68,6 +69,7 @@ import UpdateSaleItemForm from "./views/SalesManagement/SaleItems/UpdateSaleItem
 import ProductionItemsTable from "./views/ProductionManagement/ProductionItems/ProductionItemsTable";
 import AddProductionItemForm from "./views/ProductionManagement/ProductionItems/AddProductionItemForm";
 import UpdateProductionItemForm from "./views/ProductionManagement/ProductionItems/UpdateProductionItemForm";
+import SalesReport from "./views/SalesManagement/Reports/SalesReport";
 
 const LoginPage = React.lazy(() => import("./views/LoginPage/LoginPage"));
 
@@ -99,6 +101,11 @@ const AppRoutes = () => {
       return user?.permissionObject;
     }
   }, [user]);
+  // Wrapper component that passes the currently-logged-in user to the profile view
+  const CurrentUserProfile = () => {
+    if (!user) return <PageLoader />;
+    return <ViewUserProfileContent selectedUser={user} />;
+  };
   return (
     <Routes>
       <Route path="/" element={withSuspense(LoginPage)} />
@@ -115,147 +122,150 @@ const AppRoutes = () => {
 
 
           <Route path="/sales/view-sales" element={
-            <ProtectedRoute>{withSuspense(SalesTable)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Sale']}>{withSuspense(SalesTable)}</ProtectedRoute>
           } />
           <Route path="/sales/add-sale" element={
-            <ProtectedRoute>{withSuspense(AddSalesForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Sale']}>{withSuspense(AddSalesForm)}</ProtectedRoute>
           } />
           <Route path="/sales/update-sale/:id" element={
-            <ProtectedRoute>{withSuspense(UpdateSalesForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Sale']}>{withSuspense(UpdateSalesForm)}</ProtectedRoute>
           } />
           <Route path="/sales/view-sale-items" element={
-            <ProtectedRoute>{withSuspense(SaleItemsTable)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Sale Items']}>{withSuspense(SaleItemsTable)}</ProtectedRoute>
           } />
           <Route path="/sales/add-sale-item" element={
-            <ProtectedRoute>{withSuspense(AddSaleItemForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Sale Items']}>{withSuspense(AddSaleItemForm)}</ProtectedRoute>
           } />
           <Route path="/sales/update-sale-item/:id" element={
-            <ProtectedRoute>{withSuspense(UpdateSaleItemForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Sale Items']}>{withSuspense(UpdateSaleItemForm)}</ProtectedRoute>
+          } />
+          <Route path="/sales/report" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['Sales Reports']}>{withSuspense(SalesReport)}</ProtectedRoute>
           } />
 
           
           <Route path="/expenses/view-expenses" element={
-            <ProtectedRoute>{withSuspense(ExpensesTable)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Add Expense']}>{withSuspense(ExpensesTable)}</ProtectedRoute>
           } />
           <Route path="/expenses/add-expense" element={
-            <ProtectedRoute>{withSuspense(AddExpenseForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['View Expense']}>{withSuspense(AddExpenseForm)}</ProtectedRoute>
           } />
           <Route path="/expenses/update-expense/:id" element={
-            <ProtectedRoute>{withSuspense(UpdateExpenseForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['View Expense']}>{withSuspense(UpdateExpenseForm)}</ProtectedRoute>
           } />
 
 
           <Route path="/inventory/view-items" element={
-            <ProtectedRoute>{withSuspense(ItemsTable)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Items']}>{withSuspense(ItemsTable)}</ProtectedRoute>
           } />
           <Route path="/inventory/add-item" element={
-            <ProtectedRoute>{withSuspense(AddItemForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Items']}>{withSuspense(AddItemForm)}</ProtectedRoute>
           } />
           <Route path="/inventory/update-item/:id" element={
-            <ProtectedRoute>{withSuspense(UpdateItemForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Items']}>{withSuspense(UpdateItemForm)}</ProtectedRoute>
           } />
           <Route path="/inventory/stock-list" element={
-            <ProtectedRoute>{withSuspense(StocksTable)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Stock List']}>{withSuspense(StocksTable)}</ProtectedRoute>
           } />
           <Route path="/inventory/add-stock" element={
-            <ProtectedRoute>{withSuspense(AddStockForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Stock List']}>{withSuspense(AddStockForm)}</ProtectedRoute>
           } />
           <Route path="/inventory/update-stock/:id" element={
-            <ProtectedRoute>{withSuspense(UpdateStockForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Stock List']}>{withSuspense(UpdateStockForm)}</ProtectedRoute>
           } />
 
 
           <Route path="/production/view-productions" element={
-            <ProtectedRoute>{withSuspense(ProductionsTable)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Production']}>{withSuspense(ProductionsTable)}</ProtectedRoute>
           } />
           <Route path="/production/add-production" element={
-            <ProtectedRoute>{withSuspense(AddProductionForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Production']}>{withSuspense(AddProductionForm)}</ProtectedRoute>
           } />
           <Route path="/production/update-production/:id" element={
-            <ProtectedRoute>{withSuspense(UpdateProductionForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Production']}>{withSuspense(UpdateProductionForm)}</ProtectedRoute>
           } />
           <Route path="/production/view-production-items" element={
-            <ProtectedRoute>{withSuspense(ProductionItemsTable)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Production Items']}>{withSuspense(ProductionItemsTable)}</ProtectedRoute>
           } />
           <Route path="/production/add-production-item" element={
-            <ProtectedRoute>{withSuspense(AddProductionItemForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Production Items']}>{withSuspense(AddProductionItemForm)}</ProtectedRoute>
           } />
           <Route path="/production/update-production-item/:id" element={
-            <ProtectedRoute>{withSuspense(UpdateProductionItemForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Production Items']}>{withSuspense(UpdateProductionItemForm)}</ProtectedRoute>
           } />
 
 
           <Route path="/bank/view-bank-accounts" element={
-            <ProtectedRoute>{withSuspense(BankAccountsTable)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Bank Accounts']}>{withSuspense(BankAccountsTable)}</ProtectedRoute>
           } />
           <Route path="/bank/add-bank-account" element={
-            <ProtectedRoute>{withSuspense(AddBankAccountForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Bank Accounts']}>{withSuspense(AddBankAccountForm)}</ProtectedRoute>
           } />
           <Route path="/bank/update-bank-account/:id" element={
-            <ProtectedRoute>{withSuspense(UpdateBankAccountForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Bank Accounts']}>{withSuspense(UpdateBankAccountForm)}</ProtectedRoute>
           } />
           <Route path="/bank/view-bank-transactions" element={
-            <ProtectedRoute>{withSuspense(BankTransactionsTable)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Bank Transactions']}>{withSuspense(BankTransactionsTable)}</ProtectedRoute>
           } />
           <Route path="/bank/add-bank-transaction" element={
-            <ProtectedRoute>{withSuspense(AddBankTransactionForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Bank Transactions']}>{withSuspense(AddBankTransactionForm)}</ProtectedRoute>
           } />
 
 
           <Route path="/loan/view-loans" element={
-            <ProtectedRoute>{withSuspense(LoansTable)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Add Loan']}>{withSuspense(LoansTable)}</ProtectedRoute>
           } />
           <Route path="/loan/add-loan" element={
-            <ProtectedRoute>{withSuspense(AddLoanForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Add Loan']}>{withSuspense(AddLoanForm)}</ProtectedRoute>
           } />
           <Route path="/loan/update-loan/:id" element={
-            <ProtectedRoute>{withSuspense(UpdateLoanForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Add Loan']}>{withSuspense(UpdateLoanForm)}</ProtectedRoute>
           } />
           <Route path="/loan/view-loan-installments" element={
-            <ProtectedRoute>{withSuspense(LoanInstallmentsTable)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Loan Installments']}>{withSuspense(LoanInstallmentsTable)}</ProtectedRoute>
           } />
           <Route path="/loan/add-loan-installment" element={
-            <ProtectedRoute>{withSuspense(AddLoanInstallmentForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Loan Installments']}>{withSuspense(AddLoanInstallmentForm)}</ProtectedRoute>
           } />
 
 
           <Route path="/debtors/customers" element={
-            <ProtectedRoute>{withSuspense(CustomersTable)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Customers']}>{withSuspense(CustomersTable)}</ProtectedRoute>
           } />
           <Route path="/debtors/customers/add-customer" element={
-            <ProtectedRoute>{withSuspense(AddCustomerForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Customers']}>{withSuspense(AddCustomerForm)}</ProtectedRoute>
           } />
           <Route path="/debtors/customers/update-customer/:id" element={
-            <ProtectedRoute>{withSuspense(UpdateCustomerForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Customers']}>{withSuspense(UpdateCustomerForm)}</ProtectedRoute>
           } />
           <Route path="/debtors/debtors-list" element={
-            <ProtectedRoute>{withSuspense(DebtorsTable)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Debtors List']}>{withSuspense(DebtorsTable)}</ProtectedRoute>
           } />
           <Route path="/debtors/add-debtor" element={
-            <ProtectedRoute>{withSuspense(AddDebtorForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Debtors List']}>{withSuspense(AddDebtorForm)}</ProtectedRoute>
           } />
           <Route path="/debtors/update-debtor/:id" element={
-            <ProtectedRoute>{withSuspense(UpdateDebtorForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Debtors List']}>{withSuspense(UpdateDebtorForm)}</ProtectedRoute>
           } />
 
 
           <Route path="/creditors/suppliers" element={
-            <ProtectedRoute>{withSuspense(SuppliersTable)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Suppliers']}>{withSuspense(SuppliersTable)}</ProtectedRoute>
           } />
           <Route path="/creditors/suppliers/add-supplier" element={
-            <ProtectedRoute>{withSuspense(AddSupplierForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Suppliers']}>{withSuspense(AddSupplierForm)}</ProtectedRoute>
           } />
           <Route path="/creditors/suppliers/update-supplier/:id" element={
-            <ProtectedRoute>{withSuspense(UpdateSupplierForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Suppliers']}>{withSuspense(UpdateSupplierForm)}</ProtectedRoute>
           } />
           <Route path="/creditors/creditors-list" element={
-            <ProtectedRoute>{withSuspense(CreditorsTable)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Creditors List']}>{withSuspense(CreditorsTable)}</ProtectedRoute>
           } />
           <Route path="/creditors/add-creditor" element={
-            <ProtectedRoute>{withSuspense(AddCreditorForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Creditors List']}>{withSuspense(AddCreditorForm)}</ProtectedRoute>
           } />
           <Route path="/creditors/update-creditor/:id" element={
-            <ProtectedRoute>{withSuspense(UpdateCreditorForm)}</ProtectedRoute>
+            <ProtectedRoute required={PERMISSION_ID_MAP['Creditors List']}>{withSuspense(UpdateCreditorForm)}</ProtectedRoute>
           } />
           
 
@@ -273,29 +283,30 @@ const AppRoutes = () => {
           <Route path="/settings/companysetup/company-setup" element={
             <ProtectedRoute required={PERMISSION_ID_MAP['Company Setup']}>{withSuspense(CompanySetupForm)}</ProtectedRoute>
           } />
-
           <Route path="/settings/companysetup/update-company-setup/:id" element={
             <ProtectedRoute required={PERMISSION_ID_MAP['Company Setup']}>{withSuspense(UpdateCompanySetupForm)}</ProtectedRoute>
           } />
 
-          <Route path="/setup/companysetup/user-account-setup" element={
+          <Route path="/settings/profile" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['Profile Settings']}>{withSuspense(CurrentUserProfile)}</ProtectedRoute>
+          } />
+
+
+
+          <Route path="/user-management/user-account-setup" element={
             <ProtectedRoute required={PERMISSION_ID_MAP['User Management']}>{withSuspense(UserManagementTable)}</ProtectedRoute>
           } />
-
-          <Route path="/setup/companysetup/add-user" element={
-            <ProtectedRoute required={PERMISSION_ID_MAP['User Management']}>{withSuspense(AddUserForm)}</ProtectedRoute>
+          <Route path="/user-management/add-user" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['User Account Setup']}>{withSuspense(AddUserForm)}</ProtectedRoute>
           } />
-
-          <Route path="/setup/companysetup/update-user/:id" element={
-            <ProtectedRoute required={PERMISSION_ID_MAP['User Management']}>{withSuspense(UpdateUserForm)}</ProtectedRoute>
+          <Route path="/user-management/update-user/:id" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['User Account Setup']}>{withSuspense(UpdateUserForm)}</ProtectedRoute>
           } />
-
-          <Route path="/setup/companysetup/access-setup" element={
-            <ProtectedRoute required={PERMISSION_ID_MAP['User Roles']}>{withSuspense(AddUserAccessForm)}</ProtectedRoute>
+          <Route path="/user-management/access-setup" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['User Roles Management']}>{withSuspense(AddUserAccessForm)}</ProtectedRoute>
           } />
-
-          <Route path="/setup/companysetup/edit-access-setup" element={
-            <ProtectedRoute required={PERMISSION_ID_MAP['User Roles']}>{withSuspense(UpdateUserAccessForm)}</ProtectedRoute>
+          <Route path="/user-management/edit-access-setup" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['User Roles Management']}>{withSuspense(UpdateUserAccessForm)}</ProtectedRoute>
           } />
         </Route>
       </Route>

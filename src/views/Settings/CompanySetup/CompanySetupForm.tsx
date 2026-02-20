@@ -98,7 +98,7 @@ export default function CompanySetupForm() {
       try {
         const data = await getCompanies();
         if (data && data.length > 0) {
-          navigate(`/setup/companysetup/update-company-setup/${data[0].id}`);
+          navigate(`/settings/companysetup/update-company-setup/${data[0].id}`);
           return;
         }
       } catch (error) {
@@ -180,7 +180,7 @@ export default function CompanySetupForm() {
           setOpen(true);
           setTimeout(() => {
             setOpen(false);
-            navigate(`/setup/companysetup/update-company-setup/${response.id}`);
+            navigate(`/settings/companysetup/update-company-setup/${response.id}`);
           }, 1000);
         } else {
           setOpen(true);
@@ -415,7 +415,7 @@ export default function CompanySetupForm() {
                 name="tax_periods"
                 size="small"
                 fullWidth
-                value={formData.tax_periods}
+                value={formData.tax_periods ?? ""}
                 onChange={handleChange}
                 error={!!errors.tax_periods}
                 helperText={errors.tax_periods}
@@ -426,7 +426,7 @@ export default function CompanySetupForm() {
                 name="tax_last_period"
                 size="small"
                 fullWidth
-                value={formData.tax_last_period}
+                value={formData.tax_last_period ?? ""}
                 onChange={handleChange}
                 error={!!errors.tax_last_period}
                 helperText={errors.tax_last_period}
@@ -437,7 +437,7 @@ export default function CompanySetupForm() {
                 name="no_of_workers"
                 size="small"
                 fullWidth
-                value={formData.no_of_workers}
+                value={formData.no_of_workers ?? ""}
                 onChange={handleChange}
               />
 
