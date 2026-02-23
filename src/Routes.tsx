@@ -70,6 +70,8 @@ import ProductionItemsTable from "./views/ProductionManagement/ProductionItems/P
 import AddProductionItemForm from "./views/ProductionManagement/ProductionItems/AddProductionItemForm";
 import UpdateProductionItemForm from "./views/ProductionManagement/ProductionItems/UpdateProductionItemForm";
 import SalesReport from "./views/SalesManagement/Reports/SalesReport";
+import ExpensesReport from "./views/Expenses/ExpensesReport";
+import StocksReport from "./views/InventoryManagement/Reports/StocksReport";
 
 const LoginPage = React.lazy(() => import("./views/LoginPage/LoginPage"));
 
@@ -153,6 +155,9 @@ const AppRoutes = () => {
           <Route path="/expenses/update-expense/:id" element={
             <ProtectedRoute required={PERMISSION_ID_MAP['View Expense']}>{withSuspense(UpdateExpenseForm)}</ProtectedRoute>
           } />
+          <Route path="/expenses/report" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['Expense Reports']}>{withSuspense(ExpensesReport)}</ProtectedRoute>
+          } />
 
 
           <Route path="/inventory/view-items" element={
@@ -172,6 +177,9 @@ const AppRoutes = () => {
           } />
           <Route path="/inventory/update-stock/:id" element={
             <ProtectedRoute required={PERMISSION_ID_MAP['Stock List']}>{withSuspense(UpdateStockForm)}</ProtectedRoute>
+          } />
+          <Route path="/inventory/reports" element={
+            <ProtectedRoute required={PERMISSION_ID_MAP['Stock Reports']}>{withSuspense(StocksReport)}</ProtectedRoute>
           } />
 
 

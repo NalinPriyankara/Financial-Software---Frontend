@@ -41,7 +41,12 @@ export default function UpdateLoanForm() {
     setForm((p: any) => ({ ...p, [name]: value }));
   };
 
-  const computedBalance = Number(((Number(form.total_amount || 0) - Number(form.paid_amount || 0)) || 0).toFixed(2));
+  const principal = Number(form.total_amount || 0);
+  const paid = form.paid_amount ? Number(form.paid_amount) : 0;
+  const interestRate = form.interest_rate ? Number(form.interest_rate) : 0;
+  const interestAmount = Number(((principal * interestRate) / 100).toFixed(2));
+  const totalWithInterest = Number((principal + interestAmount).toFixed(2));
+  const computedBalance = Number((totalWithInterest - paid).toFixed(2));
 
   const validate = () => {
     const newErr: any = {};

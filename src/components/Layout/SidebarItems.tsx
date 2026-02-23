@@ -81,7 +81,7 @@ const baseSidebarItems: Array<SidebarItem> = [
       },
       {
         title: "Expense Reports",
-        href: "/expenses/expense-reports",
+        href: "/expenses/report",
       },
     ],
   },
@@ -119,7 +119,7 @@ const baseSidebarItems: Array<SidebarItem> = [
       },
       {
         title: "Stock Reports",
-        href: "/inventory/stock-reports",
+        href: "/inventory/reports",
       },
     ],
   },

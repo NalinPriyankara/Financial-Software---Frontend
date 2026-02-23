@@ -60,9 +60,17 @@ export default function AddLoanInstallmentForm() {
         }
 
         if (loanObj) {
-          const total = Number(loanObj.total_amount ?? 0);
-          const paid = Number(loanObj.paid_amount ?? 0);
-          const remaining = total - paid;
+          // Prefer explicit balance if provided (includes interest); fall back to total - paid
+          const balance = Number(loanObj.balance ?? NaN);
+          let remaining: number;
+          if (!Number.isNaN(balance)) {
+            remaining = balance;
+          } else {
+            const total = Number(loanObj.total_amount ?? 0);
+            const paid = Number(loanObj.paid_amount ?? 0);
+            remaining = total - paid;
+          }
+
           if (Number(payload.amount) > remaining) {
             setErrors((p) => ({ ...p, amount: `Amount exceeds remaining balance (${remaining.toFixed(2)})` }));
             return;
@@ -96,12 +104,17 @@ export default function AddLoanInstallmentForm() {
           const prevPaid = Number(existingLoan.paid_amount ?? 0);
           const add = Number(created.amount ?? payload.amount ?? 0);
           const newPaid = prevPaid + add;
-          const total = Number(existingLoan.total_amount ?? 0);
-          const newBalance = total - newPaid;
+
+          // compute total including interest if interest_rate present
+          const principal = Number(existingLoan.total_amount ?? 0);
+          const rate = existingLoan.interest_rate ? Number(existingLoan.interest_rate) : 0;
+          const interestAmount = Number(((principal * rate) / 100).toFixed(2));
+          const totalWithInterest = Number((principal + interestAmount).toFixed(2));
+          const newBalance = Number((totalWithInterest - newPaid).toFixed(2));
 
           const loanPayload: any = {
             loan_name: existingLoan.loan_name ?? existingLoan.name ?? "",
-            total_amount: total,
+            total_amount: principal,
             paid_amount: newPaid,
             balance: newBalance,
             interest_rate: existingLoan.interest_rate ?? null,

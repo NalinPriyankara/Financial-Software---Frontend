@@ -46,13 +46,19 @@ export default function AddLoanForm() {
   const handleSubmit = async () => {
     if (!validate()) return;
     try {
-      const computedBalance = Number((Number(form.total_amount || 0) - Number(form.paid_amount || 0)).toFixed(2));
+      const principal = Number(form.total_amount || 0);
+      const paid = form.paid_amount ? Number(form.paid_amount) : 0;
+      const interestRate = form.interest_rate ? Number(form.interest_rate) : 0;
+      const interestAmount = Number(((principal * interestRate) / 100).toFixed(2));
+      const totalWithInterest = Number((principal + interestAmount).toFixed(2));
+      const computedBalance = Number((totalWithInterest - paid).toFixed(2));
+
       const payload: LoanPayload = {
         loan_name: form.loan_name,
-        total_amount: Number(form.total_amount),
-        paid_amount: form.paid_amount ? Number(form.paid_amount) : 0,
+        total_amount: principal,
+        paid_amount: paid,
         balance: computedBalance,
-        interest_rate: form.interest_rate ? Number(form.interest_rate) : null,
+        interest_rate: interestRate || null,
         start_date: form.start_date,
         end_date: form.end_date || null,
       };
@@ -102,7 +108,14 @@ export default function AddLoanForm() {
 
           <TextField id="paid_amount" label="Paid Amount" name="paid_amount" type="number" inputProps={{ step: "0.01" }} size="small" fullWidth value={form.paid_amount} onChange={handleChange} />
 
-          <TextField id="balance" label="Balance" name="balance" type="number" inputProps={{ step: "0.01" }} size="small" fullWidth value={((Number(form.total_amount || 0) - Number(form.paid_amount || 0))).toFixed(2)} disabled />
+          <TextField id="balance" label="Balance" name="balance" type="number" inputProps={{ step: "0.01" }} size="small" fullWidth value={(() => {
+            const principal = Number(form.total_amount || 0);
+            const paid = form.paid_amount ? Number(form.paid_amount) : 0;
+            const interestRate = form.interest_rate ? Number(form.interest_rate) : 0;
+            const interestAmount = Number(((principal * interestRate) / 100).toFixed(2));
+            const totalWithInterest = Number((principal + interestAmount).toFixed(2));
+            return (totalWithInterest - paid).toFixed(2);
+          })()} disabled />
 
           <TextField id="interest_rate" label="Interest Rate (%)" name="interest_rate" type="number" inputProps={{ step: "0.01" }} size="small" fullWidth value={form.interest_rate} onChange={handleChange} />
 

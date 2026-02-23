@@ -8,6 +8,7 @@ import ErrorModal from "../../../components/ErrorModal";
 import { getProductionItems, updateProductionItem } from "../../../api/ProductionItems/productionItemsApi";
 import { getProductions } from "../../../api/Productions/productionsApi";
 import { getItems } from "../../../api/Items/itemsApi";
+import { createStock, updateStock } from "../../../api/Stocks/stocksApi";
 
 export default function UpdateProductionItemForm() {
   const { id } = useParams();
@@ -17,6 +18,7 @@ export default function UpdateProductionItemForm() {
   const { data: items = [] } = useQuery<any>({ queryKey: ["items"], queryFn: getItems });
   const [form, setForm] = useState<any>({});
   const [errors, setErrors] = useState<any>({});
+  const [original, setOriginal] = useState<{ item_id: number; quantity: number } | null>(null);
   const [open, setOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -32,6 +34,7 @@ export default function UpdateProductionItemForm() {
     const found = list.find((p: any) => Number(p.id) === itemId);
     if (found) {
       setForm({ production_id: String(found.production_id ?? ""), item_id: String(found.item_id ?? ""), quantity: String(found.quantity ?? "1") });
+      setOriginal({ item_id: Number(found.item_id ?? 0), quantity: Number(found.quantity ?? 0) });
     }
   }, [pis, itemId]);
 
@@ -57,15 +60,110 @@ export default function UpdateProductionItemForm() {
 
       try {
         const updated = { ...(payload as any), id: itemId };
-        queryClient.setQueryData(["production-items"], (old: any) => {
-          if (!old) return [updated];
-          if (Array.isArray(old)) return old.map((p: any) => (p.id === itemId ? updated : p));
-          if (old?.data && Array.isArray(old.data)) return { ...old, data: old.data.map((p: any) => (p.id === itemId ? updated : p)) };
-          return old;
-        });
+          queryClient.setQueryData(["production-items"], (old: any) => {
+            if (!old) return [updated];
+            if (Array.isArray(old)) return old.map((p: any) => (p.id === itemId ? updated : p));
+            if (old?.data && Array.isArray(old.data)) return { ...old, data: old.data.map((p: any) => (p.id === itemId ? updated : p)) };
+            return old;
+          });
       } catch (e) {
         console.warn("Failed optimistic update for production-items", e);
       }
+
+        // Sync stocks based on change
+        try {
+          const origItemId = original?.item_id ?? Number(payload.item_id);
+          const origQty = original?.quantity ?? 0;
+          const newItemId = Number(payload.item_id);
+          const newQty = Number(payload.quantity);
+
+          const stocksCache = queryClient.getQueryData<any>(["stocks"]);
+          const stocksList = Array.isArray(stocksCache) ? stocksCache : (stocksCache && (stocksCache as any).data) ? (stocksCache as any).data : [];
+
+          const findStockByItem = (iid: number) => (stocksList || []).find((s: any) => Number(s.item_id) === iid || Number(s.item?.id) === iid);
+
+          if (newItemId === origItemId) {
+            const delta = newQty - origQty;
+            if (delta !== 0) {
+              const existing = findStockByItem(newItemId);
+              if (existing) {
+                const updatedQty = Math.max(0, Number(existing.quantity ?? 0) + delta);
+                try {
+                  await updateStock(existing.id, { item_id: newItemId, quantity: updatedQty });
+                  queryClient.setQueryData(["stocks"], (old: any) => {
+                    const list = Array.isArray(old) ? old : (old && old.data) ? old.data : [];
+                    const updated = (list || []).map((s: any) => (s.id === existing.id ? { ...s, quantity: updatedQty } : s));
+                    if (Array.isArray(old)) return updated;
+                    return { ...(old || {}), data: updated };
+                  });
+                } catch (e) {
+                  console.error("Failed to update stock for same item:", e);
+                }
+              } else if (delta > 0) {
+                try {
+                  const createdStockRes = await createStock({ item_id: newItemId, quantity: delta } as any);
+                  const createdStock = (createdStockRes as any)?.data ?? createdStockRes;
+                  queryClient.setQueryData(["stocks"], (old: any) => {
+                    if (!old) return [createdStock];
+                    if (Array.isArray(old)) return [...old, createdStock];
+                    if (old?.data && Array.isArray(old.data)) return { ...old, data: [...old.data, createdStock] };
+                    return [createdStock];
+                  });
+                } catch (e) {
+                  console.error("Failed to create stock for same item:", e);
+                }
+              }
+            }
+          } else {
+            // Item changed: subtract origQty from orig stock, add newQty to new stock
+            const origStock = findStockByItem(origItemId);
+            if (origStock) {
+              const updatedQty = Math.max(0, Number(origStock.quantity ?? 0) - origQty);
+              try {
+                await updateStock(origStock.id, { item_id: origItemId, quantity: updatedQty });
+                queryClient.setQueryData(["stocks"], (old: any) => {
+                  const list = Array.isArray(old) ? old : (old && old.data) ? old.data : [];
+                  const updated = (list || []).map((s: any) => (s.id === origStock.id ? { ...s, quantity: updatedQty } : s));
+                  if (Array.isArray(old)) return updated;
+                  return { ...(old || {}), data: updated };
+                });
+              } catch (e) {
+                console.error("Failed to decrement original stock:", e);
+              }
+            }
+
+            const newStock = findStockByItem(newItemId);
+            if (newStock) {
+              const updatedQty = Math.max(0, Number(newStock.quantity ?? 0) + newQty);
+              try {
+                await updateStock(newStock.id, { item_id: newItemId, quantity: updatedQty });
+                queryClient.setQueryData(["stocks"], (old: any) => {
+                  const list = Array.isArray(old) ? old : (old && old.data) ? old.data : [];
+                  const updated = (list || []).map((s: any) => (s.id === newStock.id ? { ...s, quantity: updatedQty } : s));
+                  if (Array.isArray(old)) return updated;
+                  return { ...(old || {}), data: updated };
+                });
+              } catch (e) {
+                console.error("Failed to increment new stock:", e);
+              }
+            } else if (newQty > 0) {
+              try {
+                const createdStockRes = await createStock({ item_id: newItemId, quantity: newQty } as any);
+                const createdStock = (createdStockRes as any)?.data ?? createdStockRes;
+                queryClient.setQueryData(["stocks"], (old: any) => {
+                  if (!old) return [createdStock];
+                  if (Array.isArray(old)) return [...old, createdStock];
+                  if (old?.data && Array.isArray(old.data)) return { ...old, data: [...old.data, createdStock] };
+                  return [createdStock];
+                });
+              } catch (e) {
+                console.error("Failed to create new stock for new item:", e);
+              }
+            }
+          }
+        } catch (syncErr) {
+          console.error("Stock sync error on update:", syncErr);
+        }
 
       queryClient.invalidateQueries({ queryKey: ["production-items"] });
       setOpen(true);

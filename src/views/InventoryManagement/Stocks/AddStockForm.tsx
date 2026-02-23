@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, Stack, Typography, TextField, Button, Paper, MenuItem, useTheme, useMediaQuery } from "@mui/material";
 import theme from "../../../theme";
-import { createStock } from "../../../api/Stocks/stocksApi";
+import { createStock, updateStock } from "../../../api/Stocks/stocksApi";
 import { getItems } from "../../../api/Items/itemsApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -49,17 +49,44 @@ export default function AddStockForm() {
     if (!validate()) return;
     try {
       const payload = { item_id: Number(form.item_id), quantity: Number(form.quantity) };
-      const res = await createStock(payload as any);
-      const created = res;
+      // check existing stocks in cache first
+      const stocksCache = queryClient.getQueryData<any>(["stocks"]);
+      const stocksList = Array.isArray(stocksCache) ? stocksCache : (stocksCache && (stocksCache as any).data) ? (stocksCache as any).data : [];
+      const existing = (stocksList || []).find((s: any) => Number(s.item_id) === payload.item_id || Number(s.item?.id) === payload.item_id);
 
-      queryClient.setQueryData(["stocks"], (old: any) => {
-        if (!old) return [created];
-        if (Array.isArray(old)) return [...old, created];
-        if (old?.data && Array.isArray(old.data)) return { ...old, data: [...old.data, created] };
-        return [created];
-      });
+      if (existing) {
+        // update existing stock quantity
+        const newQty = Number(existing.quantity ?? 0) + Number(payload.quantity ?? 0);
+        try {
+          await updateStock(existing.id, { item_id: payload.item_id, quantity: newQty });
+          queryClient.setQueryData(["stocks"], (old: any) => {
+            const list = Array.isArray(old) ? old : (old && old.data) ? old.data : [];
+            const updated = (list || []).map((s: any) => (s.id === existing.id ? { ...s, quantity: newQty } : s));
+            if (Array.isArray(old)) return updated;
+            return { ...(old || {}), data: updated };
+          });
+          setOpen(true);
+        } catch (err: any) {
+          console.error(err);
+          const server = err?.response || err;
+          const data = server?.data || err;
+          if (data?.message) { setErrorMessage(String(data.message)); setErrorOpen(true); }
+          else { setErrorMessage("Failed to update stock. Please try again."); setErrorOpen(true); }
+        }
+      } else {
+        // create new stock record
+        const res = await createStock(payload as any);
+        const created = (res as any)?.data ?? res;
 
-      setOpen(true);
+        queryClient.setQueryData(["stocks"], (old: any) => {
+          if (!old) return [created];
+          if (Array.isArray(old)) return [...old, created];
+          if (old?.data && Array.isArray(old.data)) return { ...old, data: [...old.data, created] };
+          return [created];
+        });
+
+        setOpen(true);
+      }
     } catch (err: any) {
       console.error(err);
       const server = err?.response || err;

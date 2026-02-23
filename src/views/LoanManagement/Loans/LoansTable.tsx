@@ -68,6 +68,12 @@ export default function LoansTable() {
       id: l.id,
       loan_name: l.loan_name,
       total_amount: l.total_amount,
+      total_with_interest: (() => {
+        const principal = Number(l.total_amount ?? 0);
+        const rate = l.interest_rate ? Number(l.interest_rate) : 0;
+        const interest = (principal * rate) / 100;
+        return Number((principal + interest).toFixed(2));
+      })(),
       paid_amount: l.paid_amount,
       balance: l.balance,
       interest_rate: l.interest_rate,
@@ -136,6 +142,7 @@ export default function LoansTable() {
               <TableRow>
                 <TableCell>No</TableCell>
                 <TableCell>Loan Name</TableCell>
+                <TableCell>Amount</TableCell>
                 <TableCell>Total Amount</TableCell>
                 <TableCell>Paid Amount</TableCell>
                 <TableCell>Balance</TableCell>
@@ -153,6 +160,7 @@ export default function LoansTable() {
                     <TableCell>{page * rowsPerPage + index + 1}</TableCell>
                     <TableCell>{r.loan_name}</TableCell>
                     <TableCell>{Number(r.total_amount ?? 0).toFixed(2)}</TableCell>
+                    <TableCell>{Number(r.total_with_interest ?? 0).toFixed(2)}</TableCell>
                     <TableCell>{Number(r.paid_amount ?? 0).toFixed(2)}</TableCell>
                     <TableCell>{Math.abs(Number(r.balance ?? 0)) < 0.0001 ? "Complete" : Number(r.balance ?? 0).toFixed(2)}</TableCell>
                     <TableCell>{r.interest_rate ?? "-"}</TableCell>
@@ -168,7 +176,7 @@ export default function LoansTable() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={9} align="center">
+                  <TableCell colSpan={10} align="center">
                     <Typography variant="body2">No Records Found</Typography>
                   </TableCell>
                 </TableRow>
@@ -179,7 +187,7 @@ export default function LoansTable() {
               <TableRow>
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-                  colSpan={9}
+                  colSpan={10}
                   count={filtered.length}
                   rowsPerPage={rowsPerPage}
                   page={page}

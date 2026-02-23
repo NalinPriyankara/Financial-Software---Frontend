@@ -5,7 +5,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import theme from "../../../theme";
 import UpdateConfirmationModal from "../../../components/UpdateConfirmationModal";
 import ErrorModal from "../../../components/ErrorModal";
-import { createProductionItem } from "../../../api/ProductionItems/productionItemsApi";
+import { createProductionItem, updateProductionItem } from "../../../api/ProductionItems/productionItemsApi";
+import { createStock, updateStock } from "../../../api/Stocks/stocksApi";
 import { getProductions } from "../../../api/Productions/productionsApi";
 import { getItems } from "../../../api/Items/itemsApi";
 
@@ -47,17 +48,98 @@ export default function AddProductionItemForm() {
     if (!validate()) return;
     try {
       const payload = { production_id: Number(form.production_id), item_id: Number(form.item_id), quantity: Number(form.quantity) };
-      const res = await createProductionItem(payload as any);
-      const created = res?.data ?? res;
 
-      queryClient.setQueryData(["production-items"], (old: any) => {
-        if (!old) return [created];
-        if (Array.isArray(old)) return [...old, created];
-        if (old?.data && Array.isArray(old.data)) return { ...old, data: [...old.data, created] };
-        return [created];
-      });
+      // check if a production-item for this production + item already exists
+      const piCache = queryClient.getQueryData<any>(["production-items"]);
+      const piList = Array.isArray(piCache) ? piCache : (piCache && (piCache as any).data) ? (piCache as any).data : [];
+      const existingPI = (piList || []).find((p: any) => Number(p.production_id) === Number(payload.production_id) && Number(p.item_id) === Number(payload.item_id));
+
+      let created: any = null;
+
+      if (existingPI) {
+        // update existing production-item by increasing quantity
+        try {
+          const newQty = Number(existingPI.quantity ?? 0) + Number(payload.quantity ?? 0);
+          const resUpd = await updateProductionItem(existingPI.id, { production_id: payload.production_id, item_id: payload.item_id, quantity: newQty } as any);
+          created = (resUpd as any)?.data ?? { ...(existingPI), quantity: newQty };
+
+          // update cache for production-items
+          queryClient.setQueryData(["production-items"], (old: any) => {
+            if (!old) return [created];
+            if (Array.isArray(old)) return old.map((p: any) => (p.id === existingPI.id ? created : p));
+            if (old?.data && Array.isArray(old.data)) return { ...old, data: old.data.map((p: any) => (p.id === existingPI.id ? created : p)) };
+            return old;
+          });
+        } catch (err: any) {
+          console.error("Failed to update existing production-item:", err);
+          const server = err?.response || err;
+          const data = server?.data || err;
+          if (data?.message) { setErrorMessage(String(data.message)); setErrorOpen(true); }
+          else { setErrorMessage("Failed to update production item. Please try again."); setErrorOpen(true); }
+          return;
+        }
+      } else {
+        // create new production-item
+        const res = await createProductionItem(payload as any);
+        created = (res as any)?.data ?? res;
+
+        // update production-items cache
+        queryClient.setQueryData(["production-items"], (old: any) => {
+          if (!old) return [created];
+          if (Array.isArray(old)) return [...old, created];
+          if (old?.data && Array.isArray(old.data)) return { ...old, data: [...old.data, created] };
+          return [created];
+        });
+      }
+
+      // Sync stocks: add the added quantity to stock (same for create or update case)
+      try {
+        const itemId = Number(payload.item_id);
+        const qtyToAdd = Number(payload.quantity ?? 0);
+
+        if (qtyToAdd <= 0) {
+          // nothing to add
+        } else {
+          const stocksCache = queryClient.getQueryData<any>(["stocks"]);
+          const stocksList = Array.isArray(stocksCache) ? stocksCache : (stocksCache && (stocksCache as any).data) ? (stocksCache as any).data : [];
+
+          const existing = (stocksList || []).find((s: any) => Number(s.item_id) === itemId || Number(s.item?.id) === itemId);
+
+          if (existing) {
+            const newQty = Number(existing.quantity ?? 0) + qtyToAdd;
+            try {
+              await updateStock(existing.id, { item_id: itemId, quantity: newQty });
+              // update cache
+              queryClient.setQueryData(["stocks"], (old: any) => {
+                const list = Array.isArray(old) ? old : (old && old.data) ? old.data : [];
+                const updated = (list || []).map((s: any) => (s.id === existing.id ? { ...s, quantity: newQty } : s));
+                if (Array.isArray(old)) return updated;
+                return { ...(old || {}), data: updated };
+              });
+            } catch (err) {
+              console.error("Failed to update existing stock:", err);
+            }
+          } else {
+            try {
+              const createdStockRes = await createStock({ item_id: itemId, quantity: qtyToAdd } as any);
+              const createdStock = (createdStockRes as any)?.data ?? createdStockRes;
+              queryClient.setQueryData(["stocks"], (old: any) => {
+                if (!old) return [createdStock];
+                if (Array.isArray(old)) return [...old, createdStock];
+                if (old?.data && Array.isArray(old.data)) return { ...old, data: [...old.data, createdStock] };
+                return [createdStock];
+              });
+            } catch (err) {
+              console.error("Failed to create stock record:", err);
+            }
+          }
+        }
+      } catch (syncErr) {
+        console.error("Stock sync error:", syncErr);
+      }
 
       queryClient.invalidateQueries({ queryKey: ["production-items"] });
+      queryClient.invalidateQueries({ queryKey: ["stocks"] });
       setOpen(true);
     } catch (err: any) {
       console.error(err);
